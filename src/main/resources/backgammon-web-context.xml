@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.3.xsd">
+
+	<bean class="org.moshe.arad.game.classic_board.backgammon.Backgammon" scope="prototype">
+		<constructor-arg ref="backgammonBoard" />
+		<constructor-arg ref="turnOrder" />
+	</bean>
+	
+	<bean id="backgammonBoard" class="org.moshe.arad.game.instrument.BackgammonBoard" scope="prototype"/> 
+	<bean id="turnOrder" class="org.moshe.arad.game.turn.ClassicGameTurnOrderManager" scope="prototype"/>
+	
+	<bean id="turn" class="org.moshe.arad.game.turn.BackgammonTurn" factory-method="getInstance" scope="prototype">
+		<constructor-arg ref="firstDice" />
+		<constructor-arg ref="secondDice" />
+	</bean>
+	<bean id="firstDice" class="org.moshe.arad.game.instrument.BackgammonDice" scope="prototype"/>
+	<bean id="secondDice" class="org.moshe.arad.game.instrument.BackgammonDice" scope="prototype"/>
+	
+</beans>
