@@ -27,7 +27,7 @@ public class BackgammonGameService {
 	@Autowired
 	private ApplicationContext context;
 	
-	public void initGameAndStart(GameRoom gameRoom){
+	public void initGame(GameRoom gameRoom){
 		Backgammon backgammon = context.getBean(Backgammon.class);
 		BackgammonTurn turn = context.getBean(BackgammonTurn.class);
 		
@@ -49,6 +49,11 @@ public class BackgammonGameService {
 		backgammon.setSecondPlayer(playerBlack);
 		
 		backgammonGames.put(gameRoom.getName(), backgammon);
+		gamesPool.execute(backgammon);
+	}
+	
+	public void startGame(GameRoom gameRoom){
+		Backgammon backgammon = backgammonGames.get(gameRoom.getName());
 		gamesPool.execute(backgammon);
 	}
 }
