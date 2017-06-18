@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 @SpringBootApplication
 @RestController
-@ImportResource("classpath:backgammon-web-context.xml")
 public class Application implements ApplicationRunner {
 
 	@Autowired

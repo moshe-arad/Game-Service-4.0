@@ -21,8 +21,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Scope("prototype")
 public class InitGameRoomCompletedEventConsumer extends SimpleEventsConsumer {
 
-//	@Autowired
-//	private BackgammonGameService backgammonGameService;
+	@Autowired
+	private BackgammonGameService backgammonGameService;
 	
 	@Autowired
 	private ApplicationContext context;
@@ -39,8 +39,9 @@ public class InitGameRoomCompletedEventConsumer extends SimpleEventsConsumer {
 		InitGameRoomCompletedEvent initGameRoomCompletedEvent = convertJsonBlobIntoEvent(record.value());
 		
 		try{
-			logger.info("Will start new game..." + initGameRoomCompletedEvent);			
-//			backgammonGameService.initGame(initGameRoomCompletedEvent.getGameRoom());
+			logger.info("Will start new game..." + initGameRoomCompletedEvent);
+			String gameRoomName = initGameRoomCompletedEvent.getGameRoom().getName();
+			backgammonGameService.createNewGame(gameRoomName);
 			GameStartedEvent gameStartedEvent = context.getBean(GameStartedEvent.class);
 			gameStartedEvent.setUuid(initGameRoomCompletedEvent.getUuid());
 			gameStartedEvent.setArrived(new Date());

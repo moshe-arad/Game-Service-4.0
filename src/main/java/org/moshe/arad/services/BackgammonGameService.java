@@ -1,18 +1,10 @@
 package org.moshe.arad.services;
 
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
-import org.moshe.arad.entities.GameRoom;
-import org.moshe.arad.game.classic_board.backgammon.Backgammon;
-import org.moshe.arad.game.player.BackgammonPlayer;
-import org.moshe.arad.game.player.ClassicGamePlayer;
-import org.moshe.arad.game.player.Player;
-import org.moshe.arad.game.turn.BackgammonTurn;
-import org.moshe.arad.game.turn.ClassicGameTurnOrderManager;
+import org.moshe.arad.backgammon.Backgammon;
+import org.moshe.arad.backgammon.BackgammonDice;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -22,38 +14,36 @@ public class BackgammonGameService {
 
 	private Map<String,Backgammon> backgammonGames = new HashMap<>(100000);
 	
-	private ExecutorService gamesPool = Executors.newFixedThreadPool(8);
-	
 	@Autowired
 	private ApplicationContext context;
 	
-	public void initGame(GameRoom gameRoom){
-		Backgammon backgammon = context.getBean(Backgammon.class);
-		BackgammonTurn turn = context.getBean(BackgammonTurn.class);
-		
-		Player playerWhite = new BackgammonPlayer(gameRoom.getOpenBy(),
-				"", 100, turn, 
-				true);
-		
-		Player playerBlack = new BackgammonPlayer(gameRoom.getSecondPlayer(),
-				"", 100, turn, 
-				false);
-		
-		LinkedList<ClassicGamePlayer> backgammonPlayers = new LinkedList<>();
-		backgammonPlayers.add((BackgammonPlayer) playerWhite);
-		backgammonPlayers.add((BackgammonPlayer) playerBlack);
-				
-		((ClassicGameTurnOrderManager)backgammon.getTurnOrderManager()).setOrder(backgammonPlayers);
-		
-		backgammon.setFirstPlayer(playerWhite);
-		backgammon.setSecondPlayer(playerBlack);
-		
-		backgammonGames.put(gameRoom.getName(), backgammon);
-		gamesPool.execute(backgammon);
+	public void createNewGame(String gameRoomName){
+		backgammonGames.put(gameRoomName, context.getBean(Backgammon.class));
 	}
 	
-	public void startGame(GameRoom gameRoom){
-		Backgammon backgammon = backgammonGames.get(gameRoom.getName());
-		gamesPool.execute(backgammon);
+	public void initDice(String gameRoomName){
+		backgammonGames.get(gameRoomName).getFirstDice().initDice();
+		backgammonGames.get(gameRoomName).getSecondDice().initDice();
+	}
+	
+	public void rollDice(String gameRoomName){
+		backgammonGames.get(gameRoomName).getFirstDice().rollDice();
+		backgammonGames.get(gameRoomName).getSecondDice().rollDice();
+	}
+	
+	public BackgammonDice getFirstDice(String gameRoomName){
+		return backgammonGames.get(gameRoomName).getFirstDice();
+	}
+	
+	public BackgammonDice getSecondDice(String gameRoomName){
+		return backgammonGames.get(gameRoomName).getSecondDice();
+	}
+	
+	public Boolean isWhiteTurn(String gameRoomName){
+		return backgammonGames.get(gameRoomName).getIsWhiteTurn();
+	}
+	
+	public Boolean isBlackTurn(String gameRoomName){
+		return backgammonGames.get(gameRoomName).getIsBlackTurn();
 	}
 }

@@ -40,5 +40,11 @@ public class KafkaUtils {
 	public static final String INIT_GAME_ROOM_COMPLETED_EVENT_GROUP = "InitGameRoomCompletedEventGroup2";
 	public static final String INIT_GAME_ROOM_COMPLETED_EVENT_TOPIC = "Init-Game-Room-Completed-Event";
 	public static final String GAME_STARTED_EVENT_TOPIC = "Game-Started-Event";
+	public static final String ROLL_DICE_COMMAND_GROUP = "RollDiceCommandGroup1";
+	public static final String ROLL_DICE_COMMAND_TOPIC = "Roll-Dice-Command";
+	public static final String INIT_DICE_COMPLETED_EVENT_TOPIC = "Init-Dice-Completed-Event";
+	public static final String ROLL_DICE_GAME_ROOM_FOUND_EVENT_GROUP = "RollDiceGameRoomFoundEventGroup2";
+	public static final String ROLL_DICE_GAME_ROOM_FOUND_EVENT_TOPIC = "Roll-Dice-Game-Room-Found-Event";
+	public static final String DICE_ROLLED_EVENT_TOPIC = "Dice-Rolled-Event";
 	
 }
