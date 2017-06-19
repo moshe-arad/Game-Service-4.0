@@ -1,4 +1,4 @@
-package org.moshe.arad.backgammon;
+package org.moshe.arad.backgammon.instrument;
 
 public interface Dice {
 

@@ -41,7 +41,9 @@ public class InitGameRoomCompletedEventConsumer extends SimpleEventsConsumer {
 		try{
 			logger.info("Will start new game..." + initGameRoomCompletedEvent);
 			String gameRoomName = initGameRoomCompletedEvent.getGameRoom().getName();
-			backgammonGameService.createNewGame(gameRoomName);
+			String openBy = initGameRoomCompletedEvent.getGameRoom().getOpenBy();
+			String second = initGameRoomCompletedEvent.getGameRoom().getSecondPlayer();
+			backgammonGameService.createNewGame(gameRoomName, openBy, second);
 			GameStartedEvent gameStartedEvent = context.getBean(GameStartedEvent.class);
 			gameStartedEvent.setUuid(initGameRoomCompletedEvent.getUuid());
 			gameStartedEvent.setArrived(new Date());

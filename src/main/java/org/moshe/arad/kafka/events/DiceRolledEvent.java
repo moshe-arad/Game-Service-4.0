@@ -3,7 +3,7 @@ package org.moshe.arad.kafka.events;
 import java.util.Date;
 import java.util.UUID;
 
-import org.moshe.arad.backgammon.BackgammonDice;
+import org.moshe.arad.backgammon.instrument.BackgammonDice;
 import org.moshe.arad.entities.GameRoom;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
