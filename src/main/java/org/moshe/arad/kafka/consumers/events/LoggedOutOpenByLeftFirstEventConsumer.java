@@ -1,12 +1,11 @@
 package org.moshe.arad.kafka.consumers.events;
 
 import java.io.IOException;
-import java.util.Date;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.moshe.arad.kafka.ConsumerToProducerQueue;
-import org.moshe.arad.kafka.events.GameStartedEvent;
 import org.moshe.arad.kafka.events.InitGameRoomCompletedEvent;
+import org.moshe.arad.kafka.events.LoggedOutOpenByLeftFirstEvent;
 import org.moshe.arad.services.BackgammonGameService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +18,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Component
 @Scope("prototype")
-public class InitGameRoomCompletedEventConsumer extends SimpleEventsConsumer {
+public class LoggedOutOpenByLeftFirstEventConsumer extends SimpleEventsConsumer {
 
 	@Autowired
 	private BackgammonGameService backgammonGameService;
@@ -29,28 +28,24 @@ public class InitGameRoomCompletedEventConsumer extends SimpleEventsConsumer {
 	
 	private ConsumerToProducerQueue consumerToProducerQueue;
 	
-	Logger logger = LoggerFactory.getLogger(InitGameRoomCompletedEventConsumer.class);
+	Logger logger = LoggerFactory.getLogger(LoggedOutOpenByLeftFirstEventConsumer.class);
 	
-	public InitGameRoomCompletedEventConsumer() {
+	public LoggedOutOpenByLeftFirstEventConsumer() {
 	}
 	
 	@Override
 	public void consumerOperations(ConsumerRecord<String, String> record) {
-		InitGameRoomCompletedEvent initGameRoomCompletedEvent = convertJsonBlobIntoEvent(record.value());
+		LoggedOutOpenByLeftFirstEvent loggedOutOpenByLeftFirstEvent = convertJsonBlobIntoEvent(record.value());
 		
 		try{
-			logger.info("Will start new game..." + initGameRoomCompletedEvent);
-			String gameRoomName = initGameRoomCompletedEvent.getGameRoom().getName();
-			String openBy = initGameRoomCompletedEvent.getGameRoom().getOpenBy();
-			String second = initGameRoomCompletedEvent.getGameRoom().getSecondPlayer();
-			backgammonGameService.createNewGame(gameRoomName, openBy, second);
-			GameStartedEvent gameStartedEvent = context.getBean(GameStartedEvent.class);
-			gameStartedEvent.setUuid(initGameRoomCompletedEvent.getUuid());
-			gameStartedEvent.setArrived(new Date());
-			gameStartedEvent.setClazz("GameStartedEvent");
-			gameStartedEvent.setGameRoom(initGameRoomCompletedEvent.getGameRoom());
+			logger.info("Will stop game..." + loggedOutOpenByLeftFirstEvent);
+			logger.info("Will stop game..." + loggedOutOpenByLeftFirstEvent);
+			logger.info("Will stop game..." + loggedOutOpenByLeftFirstEvent);
+			logger.info("Will stop game..." + loggedOutOpenByLeftFirstEvent);
+			logger.info("Will stop game..." + loggedOutOpenByLeftFirstEvent);
+			logger.info("Will stop game..." + loggedOutOpenByLeftFirstEvent);
 			
-			consumerToProducerQueue.getEventsQueue().put(gameStartedEvent);
+//			backgammonGameService.initGameAndStart(initGameRoomCompletedEvent.getGameRoom());
 		}
 		catch(Exception e){
 			logger.error("Failed to add new game room to view...");
@@ -59,10 +54,10 @@ public class InitGameRoomCompletedEventConsumer extends SimpleEventsConsumer {
 		}
 	}
 	
-	private InitGameRoomCompletedEvent convertJsonBlobIntoEvent(String JsonBlob){
+	private LoggedOutOpenByLeftFirstEvent convertJsonBlobIntoEvent(String JsonBlob){
 		ObjectMapper objectMapper = new ObjectMapper();
 		try {
-			return objectMapper.readValue(JsonBlob, InitGameRoomCompletedEvent.class);
+			return objectMapper.readValue(JsonBlob, LoggedOutOpenByLeftFirstEvent.class);
 		} catch (IOException e) {
 			logger.error("Falied to convert Json blob into Event...");
 			logger.error(e.getMessage());

@@ -2,7 +2,7 @@ package org.moshe.arad.kafka;
 
 public class KafkaUtils {
 
-	public static final String SERVERS = "192.168.1.4:9092,192.168.1.4:9093,192.168.1.4:9094";
+	public static final String SERVERS = "localhost:9092,localhost:9093,localhost:9094";
 	public static final String CREATE_NEW_USER_COMMAND_GROUP = "CreateNewUserCommandGroup";
 	public static final String STRING_DESERIALIZER = "org.apache.kafka.common.serialization.StringDeserializer";
 	public static final String STRING_SERIALIZER = "org.apache.kafka.common.serialization.StringSerializer";
@@ -37,7 +37,14 @@ public class KafkaUtils {
 	public static final String LOGGED_IN_EVENT_GROUP = "LoggedInEventGroup";
 	public static final String LOGGED_IN_EVENT_TOPIC = "Logged-In-Event";
 	public static final String LOGGED_IN_EVENT_ACK_TOPIC = "Logged-In-Event-Ack";
-	public static final String LOGGED_OUT_EVENT_GROUP = "LoggedOutEventGroup1";
-	public static final String LOGGED_OUT_EVENT_TOPIC = "Logged-Out-Event";
+	public static final String INIT_GAME_ROOM_COMPLETED_EVENT_GROUP = "InitGameRoomCompletedEventGroup2";
+	public static final String INIT_GAME_ROOM_COMPLETED_EVENT_TOPIC = "Init-Game-Room-Completed-Event";
+	public static final String GAME_STARTED_EVENT_TOPIC = "Game-Started-Event";
+	public static final String ROLL_DICE_COMMAND_GROUP = "RollDiceCommandGroup1";
+	public static final String ROLL_DICE_COMMAND_TOPIC = "Roll-Dice-Command";
+	public static final String INIT_DICE_COMPLETED_EVENT_TOPIC = "Init-Dice-Completed-Event";
+	public static final String ROLL_DICE_GAME_ROOM_FOUND_EVENT_GROUP = "RollDiceGameRoomFoundEventGroup2";
+	public static final String ROLL_DICE_GAME_ROOM_FOUND_EVENT_TOPIC = "Roll-Dice-Game-Room-Found-Event";
+	public static final String DICE_ROLLED_EVENT_TOPIC = "Dice-Rolled-Event";
 	
 }
