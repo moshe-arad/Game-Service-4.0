@@ -55,5 +55,6 @@ public class KafkaUtils {
 	public static final String BLACK_PAWN_TAKEN_OUT_EVENT_TOPIC = "Black-Pawn-Taken-Out-Event";
 	public static final String BLACK_ATE_WHITE_PAWN_EVENT_TOPIC = "Black-Ate-White-Pawn-Event";
 	public static final String WHITE_ATE_BLACK_PAWN_EVENT_TOPIC = "White-Ate-Black-Pawn-Event";
+	public static final String USER_MADE_MOVE_EVENT_TOPIC = "User-Made-Move-Event";
 	
 }

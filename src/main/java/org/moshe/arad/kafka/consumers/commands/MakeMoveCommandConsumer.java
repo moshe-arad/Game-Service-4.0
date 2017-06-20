@@ -15,6 +15,7 @@ import org.moshe.arad.kafka.events.BlackPawnCameBackEvent;
 import org.moshe.arad.kafka.events.BlackPawnTakenOutEvent;
 import org.moshe.arad.kafka.events.InitDiceCompletedEvent;
 import org.moshe.arad.kafka.events.UserMadeInvalidMoveEvent;
+import org.moshe.arad.kafka.events.UserMadeMoveEvent;
 import org.moshe.arad.kafka.events.WhiteAteBlackPawnEvent;
 import org.moshe.arad.kafka.events.WhitePawnCameBackEvent;
 import org.moshe.arad.kafka.events.WhitePawnTakenOutEvent;
@@ -168,15 +169,29 @@ public class MakeMoveCommandConsumer extends SimpleCommandsConsumer {
 							consumerToProducer.get(WhiteAteBlackPawnEvent.class).getEventsQueue().put(whiteAteBlackPawnEvent);
 						}
 						else{
+							logger.info("Player made a move...");
+							UserMadeMoveEvent userMadeMoveEvent = context.getBean(UserMadeMoveEvent.class);
+							userMadeMoveEvent.setUuid(makeMoveCommand.getUuid());
+							userMadeMoveEvent.setArrived(new Date());
+							userMadeMoveEvent.setClazz("UserMadeMoveEvent");
+							userMadeMoveEvent.setUserName(username);
+							userMadeMoveEvent.setGameRoomName(gameRoomName);
+							userMadeMoveEvent.setFrom(from);
+							userMadeMoveEvent.setTo(to);
+							userMadeMoveEvent.setBoard(backgammonGameService.getBoard(gameRoomName));
+							userMadeMoveEvent.setFirstDice(backgammonGameService.getFirstDice(gameRoomName));
+							userMadeMoveEvent.setSecondDice(backgammonGameService.getSecondDice(gameRoomName));
+							userMadeMoveEvent.setWhite(backgammonGameService.getIsWhite(gameRoomName, username));
 							
+							consumerToProducer.get(UserMadeMoveEvent.class).getEventsQueue().put(userMadeMoveEvent);
 						}
 						//if from = 24 || -1, then handle: eaten pawn came back event // done
 						//if to = 24 || -1, then handle: pawn taken was out event //done
 						
-						//if eaten grew by one then handle: pawn was eaten
+						//if eaten grew by one then handle: pawn was eaten //done
 						
 						//**************************************
-						//handle user Made Move
+						//handle user Made Move //done
 						//**************************************
 					}
 					else{
