@@ -140,6 +140,16 @@ public class BackgammonGameService {
 		}
 	}
 	
+	public int getWhiteEatenNum(String gameRoomName){
+		Backgammon backgammon = backgammonGames.get(gameRoomName);		
+		return backgammon.getBoard().getWhiteEatenSize();
+	}
+	
+	public int getBlackEatenNum(String gameRoomName){
+		Backgammon backgammon = backgammonGames.get(gameRoomName);		
+		return backgammon.getBoard().getBlackEatenSize();
+	}
+	
 	private Move initMove(int from, int to) {
 		Move move = context.getBean(Move.class);
 		BackgammonBoardLocation fromLocation = context.getBean(BackgammonBoardLocation.class);

@@ -10,9 +10,12 @@ import org.moshe.arad.kafka.ConsumerToProducerQueue;
 import org.moshe.arad.kafka.commands.MakeMoveCommand;
 import org.moshe.arad.kafka.commands.RollDiceCommand;
 import org.moshe.arad.kafka.events.BackgammonEvent;
+import org.moshe.arad.kafka.events.BlackAteWhitePawnEvent;
 import org.moshe.arad.kafka.events.BlackPawnCameBackEvent;
+import org.moshe.arad.kafka.events.BlackPawnTakenOutEvent;
 import org.moshe.arad.kafka.events.InitDiceCompletedEvent;
 import org.moshe.arad.kafka.events.UserMadeInvalidMoveEvent;
+import org.moshe.arad.kafka.events.WhiteAteBlackPawnEvent;
 import org.moshe.arad.kafka.events.WhitePawnCameBackEvent;
 import org.moshe.arad.kafka.events.WhitePawnTakenOutEvent;
 import org.moshe.arad.services.BackgammonGameService;
@@ -49,6 +52,8 @@ public class MakeMoveCommandConsumer extends SimpleCommandsConsumer {
 		String username = makeMoveCommand.getUsername();
 		int from = makeMoveCommand.getFrom();
 		int to = makeMoveCommand.getTo();
+		int whiteEaten = backgammonGameService.getWhiteEatenNum(gameRoomName);
+		int blackEaten = backgammonGameService.getBlackEatenNum(gameRoomName);
 		
 		//TODO notify to view about eaten pawns
 		if(backgammonGameService.isUserWithTurn(gameRoomName, username)){
@@ -112,10 +117,61 @@ public class MakeMoveCommandConsumer extends SimpleCommandsConsumer {
 							consumerToProducer.get(WhitePawnTakenOutEvent.class).getEventsQueue().put(whitePawnTakenOutEvent);
 						}
 						else if(to == BackgammonBoard.OUT_BLACK){
+							logger.info("Black player took out a black pawn from the board game...");
+							BlackPawnTakenOutEvent blackPawnTakenOutEvent = context.getBean(BlackPawnTakenOutEvent.class);
+							blackPawnTakenOutEvent.setUuid(makeMoveCommand.getUuid());
+							blackPawnTakenOutEvent.setArrived(new Date());
+							blackPawnTakenOutEvent.setClazz("BlackPawnTakenOutEvent");
+							blackPawnTakenOutEvent.setUserName(username);
+							blackPawnTakenOutEvent.setGameRoomName(gameRoomName);
+							blackPawnTakenOutEvent.setFrom(from);
+							blackPawnTakenOutEvent.setTo(to);
+							blackPawnTakenOutEvent.setBoard(backgammonGameService.getBoard(gameRoomName));
+							blackPawnTakenOutEvent.setFirstDice(backgammonGameService.getFirstDice(gameRoomName));
+							blackPawnTakenOutEvent.setSecondDice(backgammonGameService.getSecondDice(gameRoomName));
+							blackPawnTakenOutEvent.setWhite(backgammonGameService.getIsWhite(gameRoomName, username));
+							
+							consumerToProducer.get(BlackPawnTakenOutEvent.class).getEventsQueue().put(blackPawnTakenOutEvent);
+						}
+						else if((whiteEaten + 1) == backgammonGameService.getWhiteEatenNum(gameRoomName)){
+							logger.info("Black player ate white pawn...");
+							BlackAteWhitePawnEvent blackAteWhitePawnEvent = context.getBean(BlackAteWhitePawnEvent.class);
+							blackAteWhitePawnEvent.setUuid(makeMoveCommand.getUuid());
+							blackAteWhitePawnEvent.setArrived(new Date());
+							blackAteWhitePawnEvent.setClazz("BlackAteWhitePawnEvent");
+							blackAteWhitePawnEvent.setUserName(username);
+							blackAteWhitePawnEvent.setGameRoomName(gameRoomName);
+							blackAteWhitePawnEvent.setFrom(from);
+							blackAteWhitePawnEvent.setTo(to);
+							blackAteWhitePawnEvent.setBoard(backgammonGameService.getBoard(gameRoomName));
+							blackAteWhitePawnEvent.setFirstDice(backgammonGameService.getFirstDice(gameRoomName));
+							blackAteWhitePawnEvent.setSecondDice(backgammonGameService.getSecondDice(gameRoomName));
+							blackAteWhitePawnEvent.setWhite(backgammonGameService.getIsWhite(gameRoomName, username));
+							
+							consumerToProducer.get(BlackAteWhitePawnEvent.class).getEventsQueue().put(blackAteWhitePawnEvent);
+						}
+						else if((blackEaten + 1) == backgammonGameService.getBlackEatenNum(gameRoomName)){
+							logger.info("White player ate black pawn...");
+							WhiteAteBlackPawnEvent whiteAteBlackPawnEvent = context.getBean(WhiteAteBlackPawnEvent.class);
+							whiteAteBlackPawnEvent.setUuid(makeMoveCommand.getUuid());
+							whiteAteBlackPawnEvent.setArrived(new Date());
+							whiteAteBlackPawnEvent.setClazz("WhiteAteBlackPawnEvent");
+							whiteAteBlackPawnEvent.setUserName(username);
+							whiteAteBlackPawnEvent.setGameRoomName(gameRoomName);
+							whiteAteBlackPawnEvent.setFrom(from);
+							whiteAteBlackPawnEvent.setTo(to);
+							whiteAteBlackPawnEvent.setBoard(backgammonGameService.getBoard(gameRoomName));
+							whiteAteBlackPawnEvent.setFirstDice(backgammonGameService.getFirstDice(gameRoomName));
+							whiteAteBlackPawnEvent.setSecondDice(backgammonGameService.getSecondDice(gameRoomName));
+							whiteAteBlackPawnEvent.setWhite(backgammonGameService.getIsWhite(gameRoomName, username));
+							
+							consumerToProducer.get(WhiteAteBlackPawnEvent.class).getEventsQueue().put(whiteAteBlackPawnEvent);
+						}
+						else{
 							
 						}
 						//if from = 24 || -1, then handle: eaten pawn came back event // done
-						//if to = 24 || -1, then handle: pawn taken was out event
+						//if to = 24 || -1, then handle: pawn taken was out event //done
 						
 						//if eaten grew by one then handle: pawn was eaten
 						
