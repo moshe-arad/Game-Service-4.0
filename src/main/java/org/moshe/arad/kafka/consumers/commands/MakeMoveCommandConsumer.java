@@ -5,12 +5,14 @@ import java.util.Date;
 import java.util.Map;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.moshe.arad.backgammon.instrument.BackgammonBoard;
 import org.moshe.arad.kafka.ConsumerToProducerQueue;
 import org.moshe.arad.kafka.commands.MakeMoveCommand;
 import org.moshe.arad.kafka.commands.RollDiceCommand;
 import org.moshe.arad.kafka.events.BackgammonEvent;
 import org.moshe.arad.kafka.events.InitDiceCompletedEvent;
 import org.moshe.arad.kafka.events.UserMadeInvalidMoveEvent;
+import org.moshe.arad.kafka.events.WhitePawnCameBackEvent;
 import org.moshe.arad.services.BackgammonGameService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,6 +58,27 @@ public class MakeMoveCommandConsumer extends SimpleCommandsConsumer {
 					//TODO handle eat move events + take out events
 					//TODO handle can not play because of eaten can come back
 					if(backgammonGameService.isCanKeepPlay(gameRoomName, username)){
+						if(from == BackgammonBoard.EATEN_WHITE){
+							logger.info("White player returned a white pawn into the game...");
+							WhitePawnCameBackEvent whitePawnCameBackEvent = context.getBean(WhitePawnCameBackEvent.class);
+							whitePawnCameBackEvent.setUuid(makeMoveCommand.getUuid());
+							whitePawnCameBackEvent.setArrived(new Date());
+							whitePawnCameBackEvent.setClazz("WhitePawnCameBackEvent");
+							whitePawnCameBackEvent.setUserName(username);
+							whitePawnCameBackEvent.setGameRoomName(gameRoomName);
+							whitePawnCameBackEvent.setFrom(from);
+							whitePawnCameBackEvent.setTo(to);
+							whitePawnCameBackEvent.setBoard(backgammonGameService.getBoard(gameRoomName));
+							whitePawnCameBackEvent.setFirstDice(backgammonGameService.getFirstDice(gameRoomName));
+							whitePawnCameBackEvent.setSecondDice(backgammonGameService.getSecondDice(gameRoomName));
+							whitePawnCameBackEvent.setWhite(backgammonGameService.getIsWhite(gameRoomName, username));
+							
+							consumerToProducer.get(WhitePawnCameBackEvent.class).getEventsQueue().put(whitePawnCameBackEvent);
+						}
+//						else if(from == BackgammonBoard.EATEN_BLACK){
+//							
+//						}
+						
 						//if from = 24 || -1, then handle: eaten pawn came back event
 						//if to = 24 || -1, then handle: pawn taken was out event
 						
