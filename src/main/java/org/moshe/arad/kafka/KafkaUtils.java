@@ -46,5 +46,8 @@ public class KafkaUtils {
 	public static final String ROLL_DICE_GAME_ROOM_FOUND_EVENT_GROUP = "RollDiceGameRoomFoundEventGroup2";
 	public static final String ROLL_DICE_GAME_ROOM_FOUND_EVENT_TOPIC = "Roll-Dice-Game-Room-Found-Event";
 	public static final String DICE_ROLLED_EVENT_TOPIC = "Dice-Rolled-Event";
+	public static final String MAKE_MOVE_COMMAND_GROUP = "MakeMoveCommnandGroup1";
+	public static final String MAKE_MOVE_COMMAND_TOPIC = "Make-Move-Command";
+	public static final String USER_MADE_INVALID_MOVE_EVENT_TOPIC = "User-Made-Invalid-Move-Event";
 	
 }

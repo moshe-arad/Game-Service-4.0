@@ -1,6 +1,7 @@
 package org.moshe.arad.initializer;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -8,17 +9,20 @@ import java.util.concurrent.Executors;
 import org.moshe.arad.kafka.ConsumerToProducerQueue;
 import org.moshe.arad.kafka.KafkaUtils;
 import org.moshe.arad.kafka.consumers.ISimpleConsumer;
+import org.moshe.arad.kafka.consumers.commands.MakeMoveCommandConsumer;
 import org.moshe.arad.kafka.consumers.commands.RollDiceCommandConsumer;
 import org.moshe.arad.kafka.consumers.config.InitGameRoomCompletedEventConfig;
+import org.moshe.arad.kafka.consumers.config.MakeMoveCommandConfig;
 import org.moshe.arad.kafka.consumers.config.RollDiceCommandConfig;
 import org.moshe.arad.kafka.consumers.config.RollDiceGameRoomFoundEventConfig;
 import org.moshe.arad.kafka.consumers.config.SimpleConsumerConfig;
 import org.moshe.arad.kafka.consumers.events.InitGameRoomCompletedEventConsumer;
 import org.moshe.arad.kafka.consumers.events.RollDiceGameRoomFoundEventConsumer;
+import org.moshe.arad.kafka.events.BackgammonEvent;
 import org.moshe.arad.kafka.events.DiceRolledEvent;
 import org.moshe.arad.kafka.events.GameStartedEvent;
 import org.moshe.arad.kafka.events.InitDiceCompletedEvent;
-import org.moshe.arad.kafka.events.InitGameRoomCompletedEvent;
+import org.moshe.arad.kafka.events.UserMadeInvalidMoveEvent;
 import org.moshe.arad.kafka.producers.ISimpleProducer;
 import org.moshe.arad.kafka.producers.events.SimpleEventsProducer;
 import org.slf4j.Logger;
@@ -56,11 +60,21 @@ public class AppInit implements ApplicationContextAware, IAppInitializer {
 	@Autowired
 	private SimpleEventsProducer<DiceRolledEvent> diceRolledEventProducer;
 	
+	private MakeMoveCommandConsumer makeMoveCommandConsumer;
+	
+	@Autowired
+	private MakeMoveCommandConfig makeMoveCommandConfig;
+	
+	@Autowired
+	private SimpleEventsProducer<UserMadeInvalidMoveEvent> userMadeInvalidMoveEventProducer;
+	
 	private ConsumerToProducerQueue initGameRoomCompletedEventQueue;
 	
 	private ConsumerToProducerQueue rollDiceCommandQueue;
 	
 	private ConsumerToProducerQueue rollDiceGameRoomFoundEventQueue;
+	
+	private ConsumerToProducerQueue userMadeInvalidMoveEventQueue;
 	
 	private ExecutorService executor = Executors.newFixedThreadPool(6);
 	
@@ -74,12 +88,22 @@ public class AppInit implements ApplicationContextAware, IAppInitializer {
 	@Override
 	public void initKafkaCommandsConsumers() {
 		rollDiceCommandQueue = context.getBean(ConsumerToProducerQueue.class);
+		userMadeInvalidMoveEventQueue = context.getBean(ConsumerToProducerQueue.class);
 		
 		for(int i=0; i<NUM_CONSUMERS; i++){
 			rollDiceCommandConsumer = context.getBean(RollDiceCommandConsumer.class);
 			initSingleConsumer(rollDiceCommandConsumer, KafkaUtils.ROLL_DICE_COMMAND_TOPIC, rollDiceCommandConfig, rollDiceCommandQueue);
 			
-			executeProducersAndConsumers(Arrays.asList(rollDiceCommandConsumer));
+			makeMoveCommandConsumer = context.getBean(MakeMoveCommandConsumer.class);
+			
+			HashMap<Class<? extends BackgammonEvent>, ConsumerToProducerQueue> queueMap = new HashMap<>(10000);
+			queueMap.put(UserMadeInvalidMoveEvent.class, userMadeInvalidMoveEventQueue);			
+			makeMoveCommandConsumer.setConsumerToProducer(queueMap);
+			
+			initSingleConsumer(makeMoveCommandConsumer, KafkaUtils.MAKE_MOVE_COMMAND_TOPIC, makeMoveCommandConfig, null);
+			
+			executeProducersAndConsumers(Arrays.asList(rollDiceCommandConsumer,
+					makeMoveCommandConsumer));
 		}
 	}
 
@@ -113,6 +137,8 @@ public class AppInit implements ApplicationContextAware, IAppInitializer {
 		initSingleProducer(initDiceCompletedEventProducer, KafkaUtils.INIT_DICE_COMPLETED_EVENT_TOPIC, rollDiceCommandQueue);
 		
 		initSingleProducer(diceRolledEventProducer, KafkaUtils.DICE_ROLLED_EVENT_TOPIC, rollDiceGameRoomFoundEventQueue);
+		
+		initSingleProducer(userMadeInvalidMoveEventProducer, KafkaUtils.USER_MADE_INVALID_MOVE_EVENT_TOPIC, userMadeInvalidMoveEventQueue);
 		
 		executeProducersAndConsumers(Arrays.asList(gameStartedEventEventProducer,
 				initDiceCompletedEventProducer,

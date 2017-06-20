@@ -37,16 +37,20 @@ public class RollDiceCommandConsumer extends SimpleCommandsConsumer {
 	@Override
 	public void consumerOperations(ConsumerRecord<String, String> record) {
 		RollDiceCommand rollDiceCommand = convertJsonBlobIntoEvent(record.value());
-		backgammonGameService.initDice(rollDiceCommand.getGameRoomName());
+		String gameRoomName = rollDiceCommand.getGameRoomName();
+		String username = rollDiceCommand.getUsername();
 		
-		InitDiceCompletedEvent initDiceCompletedEvent = context.getBean(InitDiceCompletedEvent.class);
-		initDiceCompletedEvent.setUuid(rollDiceCommand.getUuid());
-		initDiceCompletedEvent.setArrived(new Date());
-		initDiceCompletedEvent.setClazz("InitDiceCompletedEvent");
-		initDiceCompletedEvent.setGameRoomName(rollDiceCommand.getGameRoomName());
-		initDiceCompletedEvent.setUsername(rollDiceCommand.getUsername());
-		
-		consumerToProducerQueue.getEventsQueue().put(initDiceCompletedEvent);
+		if(backgammonGameService.initDice(gameRoomName, username)){
+			InitDiceCompletedEvent initDiceCompletedEvent = context.getBean(InitDiceCompletedEvent.class);
+			initDiceCompletedEvent.setUuid(rollDiceCommand.getUuid());
+			initDiceCompletedEvent.setArrived(new Date());
+			initDiceCompletedEvent.setClazz("InitDiceCompletedEvent");
+			initDiceCompletedEvent.setGameRoomName(rollDiceCommand.getGameRoomName());
+			initDiceCompletedEvent.setUsername(rollDiceCommand.getUsername());
+			
+			consumerToProducerQueue.getEventsQueue().put(initDiceCompletedEvent);
+		}
+		else throw new RuntimeException("Failed to init dice, turn may be not belong to the user...");		
 	}
 	
 	private RollDiceCommand convertJsonBlobIntoEvent(String JsonBlob){

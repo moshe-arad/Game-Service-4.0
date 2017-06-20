@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.moshe.arad.backgammon.Backgammon;
+import org.moshe.arad.backgammon.instrument.BackgammonBoard;
 import org.moshe.arad.backgammon.instrument.BackgammonDice;
 import org.moshe.arad.backgammon.move.BackgammonBoardLocation;
 import org.moshe.arad.backgammon.move.Move;
@@ -33,10 +34,16 @@ public class BackgammonGameService {
 		backgammonGames.put(gameRoomName, backgammon);
 	}
 	
-	public void initDice(String gameRoomName){
-		BackgammonPlayer player = backgammonGames.get(gameRoomName).getTurnManager().howHasTurn();		
-		player.getTurn().getFirstDice().initDice();
-		player.getTurn().getSecondDice().initDice();
+	public boolean initDice(String gameRoomName, String username){
+		Backgammon backgammon = backgammonGames.get(gameRoomName);
+		BackgammonPlayer player = backgammon.getTurnManager().howHasTurn();
+		
+		if(username.equals(player.getFirstName())){
+			player.getTurn().getFirstDice().initDice();
+			player.getTurn().getSecondDice().initDice();
+			return true;
+		}
+		else return false;
 	}
 	
 	public void rollDice(String gameRoomName){
@@ -64,31 +71,89 @@ public class BackgammonGameService {
 		return !backgammonGames.get(gameRoomName).getTurnManager().howHasTurn().isWhite();
 	}
 
-	public void makeMove(String username, String gameRoomName, int from, int to) throws Exception {
-//		Backgammon backgammon = backgammonGames.get(gameRoomName);
-//		BackgammonPlayer withTurn = backgammon.getTurnManager().howHasTurn();
-//		
-//		if(!withTurn.getFirstName().equals(username)){
-//			logger.error("Player does not own turn, can not make move");
-//			return false;
-//		}
-//		else if(!backgammon.getBoard().isWinner(withTurn) && backgammon.getBoard().isHasMoreMoves(withTurn)){
-//			Move move = context.getBean(Move.class);
-//			BackgammonBoardLocation fromLocation = context.getBean(BackgammonBoardLocation.class);
-//			BackgammonBoardLocation toLocation = context.getBean(BackgammonBoardLocation.class);
-//			
-//			fromLocation.setIndex(from);
-//			toLocation.setIndex(to);
-//			
-//			move.setFrom(fromLocation);
-//			move.setTo(toLocation);
-//			
-//			if(backgammon.getBoard().isValidMove(withTurn, move)){
-//				backgammon.getBoard().executeMove(withTurn, move);
-//				withTurn.makePlayed(move);
-//			}
-//			return false;
-//		}
-//		else return false;
+	public boolean isUserWithTurn(String gameRoomName, String username){
+		Backgammon backgammon = backgammonGames.get(gameRoomName);
+		BackgammonPlayer withTurn = backgammon.getTurnManager().howHasTurn();
+		
+		if(withTurn.getFirstName().equals(username)) return true;
+		else {
+			logger.error("Player does not own turn, can not make move");
+			return false;
+		}
+	}
+	
+	public boolean makeMove(String username, String gameRoomName, int from, int to) throws Exception {
+		Backgammon backgammon = backgammonGames.get(gameRoomName);
+		BackgammonPlayer withTurn = backgammon.getTurnManager().howHasTurn();
+		BackgammonBoard board = backgammon.getBoard();
+		
+		logger.info("The board before making move:");
+		logger.info(board.toString());
+		
+		int eatenWhite = board.getWhiteEatenSize();
+		int eatenBlack = board.getBlackEatenSize();
+		logger.info("Before applying move, white has eaten = " + eatenWhite);
+		logger.info("Before applying move, black has eaten = " + eatenBlack);			
+		
+		Move move = initMove(from, to);
+		
+		if(board.isValidMove(withTurn, move)){
+			logger.info("The move passed validation.");
+			backgammon.getBoard().executeMove(withTurn, move);
+			withTurn.makePlayed(move);
+			
+			logger.info("A move was made...");
+			logger.info("************************************");
+			logger.info("The board after making move:");
+			logger.info(board.toString());
+			
+			return true;
+		}
+		return false;
+	}
+
+	public boolean isCanKeepPlay(String gameRoomName, String username) throws Exception{
+		Backgammon backgammon = backgammonGames.get(gameRoomName);
+		
+		if(isUserWithTurn(gameRoomName, username)){
+			BackgammonPlayer withTurn = backgammon.getTurnManager().howHasTurn();
+			BackgammonBoard board = backgammon.getBoard();
+			
+			return isCanKeepPlay(withTurn, board);
+		}
+		else return false;
+	}
+	
+	public BackgammonBoard getBoard(String gameRoomName){
+		return backgammonGames.get(gameRoomName).getBoard();
+	}
+	
+	public boolean getIsWhite(String gameRoomName, String username){
+		Backgammon backgammon = backgammonGames.get(gameRoomName);
+		BackgammonPlayer player = backgammon.getTurnManager().howHasTurn();
+		if(player.getFirstName().equals(username)){
+			return player.isWhite();
+		}
+		else{
+			player = backgammon.getTurnManager().howIsNextInTurn();
+			return player.isWhite();
+		}
+	}
+	
+	private Move initMove(int from, int to) {
+		Move move = context.getBean(Move.class);
+		BackgammonBoardLocation fromLocation = context.getBean(BackgammonBoardLocation.class);
+		BackgammonBoardLocation toLocation = context.getBean(BackgammonBoardLocation.class);
+		
+		fromLocation.setIndex(from);
+		toLocation.setIndex(to);
+		
+		move.setFrom(fromLocation);
+		move.setTo(toLocation);
+		return move;
+	}
+	
+	private boolean isCanKeepPlay(BackgammonPlayer player, BackgammonBoard board) throws Exception{
+		return !board.isWinner(player) && board.isHasMoreMoves(player);
 	}
 }
