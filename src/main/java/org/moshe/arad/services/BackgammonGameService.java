@@ -150,6 +150,34 @@ public class BackgammonGameService {
 		return backgammon.getBoard().getBlackEatenSize();
 	}
 	
+	public boolean isHasWinner(String gameRoomName) throws Exception{
+		Backgammon backgammon = backgammonGames.get(gameRoomName);
+		BackgammonBoard board = backgammon.getBoard();
+		
+		BackgammonPlayer first = backgammon.getTurnManager().howHasTurn();
+		BackgammonPlayer second = backgammon.getTurnManager().howIsNextInTurn();
+		return board.isWinner(first) || board.isWinner(second);
+	}
+	
+	public boolean isWhiteCanPlay(String gameRoomName) throws Exception{
+		Backgammon backgammon = backgammonGames.get(gameRoomName);
+		BackgammonBoard board = backgammon.getBoard();
+		
+		return board.isWhiteCanPlay();
+	}
+	
+	public boolean isBlackCanPlay(String gameRoomName) throws Exception{
+		Backgammon backgammon = backgammonGames.get(gameRoomName);
+		BackgammonBoard board = backgammon.getBoard();
+		
+		return board.isBlackCanPlay();
+	}
+	
+	public void passTurn(String gameRoomName){
+		Backgammon backgammon = backgammonGames.get(gameRoomName);
+		backgammon.getTurnManager().passTurn();
+	}
+	
 	private Move initMove(int from, int to) {
 		Move move = context.getBean(Move.class);
 		BackgammonBoardLocation fromLocation = context.getBean(BackgammonBoardLocation.class);

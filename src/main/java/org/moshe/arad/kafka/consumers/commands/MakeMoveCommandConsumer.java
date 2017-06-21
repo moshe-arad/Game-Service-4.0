@@ -14,6 +14,8 @@ import org.moshe.arad.kafka.events.BlackAteWhitePawnEvent;
 import org.moshe.arad.kafka.events.BlackPawnCameBackEvent;
 import org.moshe.arad.kafka.events.BlackPawnTakenOutEvent;
 import org.moshe.arad.kafka.events.InitDiceCompletedEvent;
+import org.moshe.arad.kafka.events.LastMoveWhitePawnCameBackEvent;
+import org.moshe.arad.kafka.events.TurnNotPassedWhitePawnCameBackEvent;
 import org.moshe.arad.kafka.events.UserMadeInvalidMoveEvent;
 import org.moshe.arad.kafka.events.UserMadeMoveEvent;
 import org.moshe.arad.kafka.events.WhiteAteBlackPawnEvent;
@@ -62,6 +64,9 @@ public class MakeMoveCommandConsumer extends SimpleCommandsConsumer {
 				
 				if(backgammonGameService.makeMove(username, gameRoomName, from, to)){
 					logger.info("The move was made..");
+					
+					//if has winner, then handle: winner move made + end game
+					
 					
 					//TODO handle eat move events + take out events
 					//TODO handle can not play because of eaten can come back
@@ -195,10 +200,49 @@ public class MakeMoveCommandConsumer extends SimpleCommandsConsumer {
 						//**************************************
 					}
 					else{
-						//if has winner, then handle: winner move made + end game
-						
-						//else:
-						
+						if((backgammonGameService.getIsWhite(gameRoomName, username) && backgammonGameService.isWhiteCanPlay(gameRoomName)) ||
+								(!backgammonGameService.getIsWhite(gameRoomName, username) && backgammonGameService.isBlackCanPlay(gameRoomName))){
+							//turn not passed
+							if(from == BackgammonBoard.EATEN_WHITE){
+								logger.info("White player returned a white pawn into the game...");
+								TurnNotPassedWhitePawnCameBackEvent turnNotPassedWhitePawnCameBackEvent = context.getBean(TurnNotPassedWhitePawnCameBackEvent.class);
+								turnNotPassedWhitePawnCameBackEvent.setUuid(makeMoveCommand.getUuid());
+								turnNotPassedWhitePawnCameBackEvent.setArrived(new Date());
+								turnNotPassedWhitePawnCameBackEvent.setClazz("TurnNotPassedWhitePawnCameBackEvent");
+								turnNotPassedWhitePawnCameBackEvent.setUserName(username);
+								turnNotPassedWhitePawnCameBackEvent.setGameRoomName(gameRoomName);
+								turnNotPassedWhitePawnCameBackEvent.setFrom(from);
+								turnNotPassedWhitePawnCameBackEvent.setTo(to);
+								turnNotPassedWhitePawnCameBackEvent.setBoard(backgammonGameService.getBoard(gameRoomName));
+								turnNotPassedWhitePawnCameBackEvent.setFirstDice(backgammonGameService.getFirstDice(gameRoomName));
+								turnNotPassedWhitePawnCameBackEvent.setSecondDice(backgammonGameService.getSecondDice(gameRoomName));
+								turnNotPassedWhitePawnCameBackEvent.setWhite(backgammonGameService.getIsWhite(gameRoomName, username));
+								
+								consumerToProducer.get(TurnNotPassedWhitePawnCameBackEvent.class).getEventsQueue().put(turnNotPassedWhitePawnCameBackEvent);
+							}
+						}
+						else{
+							//turn passed
+							if(from == BackgammonBoard.EATEN_WHITE){
+								logger.info("White player returned a white pawn into the game...");
+								LastMoveWhitePawnCameBackEvent lastMoveWhitePawnCameBackEvent = context.getBean(LastMoveWhitePawnCameBackEvent.class);
+								lastMoveWhitePawnCameBackEvent.setUuid(makeMoveCommand.getUuid());
+								lastMoveWhitePawnCameBackEvent.setArrived(new Date());
+								lastMoveWhitePawnCameBackEvent.setClazz("LastMoveWhitePawnCameBackEvent");
+								lastMoveWhitePawnCameBackEvent.setUserName(username);
+								lastMoveWhitePawnCameBackEvent.setGameRoomName(gameRoomName);
+								lastMoveWhitePawnCameBackEvent.setFrom(from);
+								lastMoveWhitePawnCameBackEvent.setTo(to);
+								lastMoveWhitePawnCameBackEvent.setBoard(backgammonGameService.getBoard(gameRoomName));
+								lastMoveWhitePawnCameBackEvent.setFirstDice(backgammonGameService.getFirstDice(gameRoomName));
+								lastMoveWhitePawnCameBackEvent.setSecondDice(backgammonGameService.getSecondDice(gameRoomName));
+								lastMoveWhitePawnCameBackEvent.setWhite(backgammonGameService.getIsWhite(gameRoomName, username));
+								
+								consumerToProducer.get(LastMoveWhitePawnCameBackEvent.class).getEventsQueue().put(lastMoveWhitePawnCameBackEvent);
+								
+								backgammonGameService.passTurn(gameRoomName);
+							}
+						}
 						//if from = 24 || -1, then handle: eaten pawn came back event
 						//if to = 24 || -1, then handle: pawn taken was out event
 						

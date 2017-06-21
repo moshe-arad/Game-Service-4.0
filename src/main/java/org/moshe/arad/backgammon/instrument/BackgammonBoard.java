@@ -176,6 +176,32 @@ public class BackgammonBoard implements Board {
 		}
 	}
 
+	public boolean isWhiteCanPlay() throws Exception{
+		if(eatenWhites.size() > 0){
+			for(int i=0; i<7; i++){
+				if(this.getSizeOfColumn(new BackgammonBoardLocation(i)) <= 1 && 
+						!BackgammonPawn.isWhite(this.peekAtColumn(new BackgammonBoardLocation(i)))){
+					return true;
+				}
+			}
+			return false;
+		}
+		else return true;
+	}
+	
+	public boolean isBlackCanPlay() throws Exception{
+		if(eatenBlacks.size() > 0){
+			for(int i=23; i>17; i--){
+				if(this.getSizeOfColumn(new BackgammonBoardLocation(i)) <= 1 &&
+						BackgammonPawn.isWhite(this.peekAtColumn(new BackgammonBoardLocation(i)))){
+					return true;
+				}
+			}
+			return false;
+		}
+		else return true;
+	}
+	
 	@Override
 	public boolean isWinner(Player player) throws Exception {
 		if(player == null) throw new Exception("player is null.");
