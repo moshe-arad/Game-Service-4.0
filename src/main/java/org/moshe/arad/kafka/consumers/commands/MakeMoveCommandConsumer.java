@@ -14,7 +14,9 @@ import org.moshe.arad.kafka.events.BlackAteWhitePawnEvent;
 import org.moshe.arad.kafka.events.BlackPawnCameBackEvent;
 import org.moshe.arad.kafka.events.BlackPawnTakenOutEvent;
 import org.moshe.arad.kafka.events.InitDiceCompletedEvent;
+import org.moshe.arad.kafka.events.LastMoveBlackPawnCameBackEvent;
 import org.moshe.arad.kafka.events.LastMoveWhitePawnCameBackEvent;
+import org.moshe.arad.kafka.events.TurnNotPassedBlackPawnCameBackEvent;
 import org.moshe.arad.kafka.events.TurnNotPassedWhitePawnCameBackEvent;
 import org.moshe.arad.kafka.events.UserMadeInvalidMoveEvent;
 import org.moshe.arad.kafka.events.UserMadeMoveEvent;
@@ -220,6 +222,23 @@ public class MakeMoveCommandConsumer extends SimpleCommandsConsumer {
 								
 								consumerToProducer.get(TurnNotPassedWhitePawnCameBackEvent.class).getEventsQueue().put(turnNotPassedWhitePawnCameBackEvent);
 							}
+							else if(from == BackgammonBoard.EATEN_BLACK){
+								logger.info("Black player returned a black pawn into the game...");
+								TurnNotPassedBlackPawnCameBackEvent turnNotPassedBlackPawnCameBackEvent = context.getBean(TurnNotPassedBlackPawnCameBackEvent.class);
+								turnNotPassedBlackPawnCameBackEvent.setUuid(makeMoveCommand.getUuid());
+								turnNotPassedBlackPawnCameBackEvent.setArrived(new Date());
+								turnNotPassedBlackPawnCameBackEvent.setClazz("TurnNotPassedBlackPawnCameBackEvent");
+								turnNotPassedBlackPawnCameBackEvent.setUserName(username);
+								turnNotPassedBlackPawnCameBackEvent.setGameRoomName(gameRoomName);
+								turnNotPassedBlackPawnCameBackEvent.setFrom(from);
+								turnNotPassedBlackPawnCameBackEvent.setTo(to);
+								turnNotPassedBlackPawnCameBackEvent.setBoard(backgammonGameService.getBoard(gameRoomName));
+								turnNotPassedBlackPawnCameBackEvent.setFirstDice(backgammonGameService.getFirstDice(gameRoomName));
+								turnNotPassedBlackPawnCameBackEvent.setSecondDice(backgammonGameService.getSecondDice(gameRoomName));
+								turnNotPassedBlackPawnCameBackEvent.setWhite(backgammonGameService.getIsWhite(gameRoomName, username));
+								
+								consumerToProducer.get(TurnNotPassedBlackPawnCameBackEvent.class).getEventsQueue().put(turnNotPassedBlackPawnCameBackEvent);
+							}
 						}
 						else{
 							//turn passed
@@ -239,6 +258,25 @@ public class MakeMoveCommandConsumer extends SimpleCommandsConsumer {
 								lastMoveWhitePawnCameBackEvent.setWhite(backgammonGameService.getIsWhite(gameRoomName, username));
 								
 								consumerToProducer.get(LastMoveWhitePawnCameBackEvent.class).getEventsQueue().put(lastMoveWhitePawnCameBackEvent);
+								
+								backgammonGameService.passTurn(gameRoomName);
+							}
+							else if(from == BackgammonBoard.EATEN_BLACK){
+								logger.info("Black player returned a black pawn into the game...");
+								LastMoveBlackPawnCameBackEvent lastMoveBlackPawnCameBackEvent = context.getBean(LastMoveBlackPawnCameBackEvent.class);
+								lastMoveBlackPawnCameBackEvent.setUuid(makeMoveCommand.getUuid());
+								lastMoveBlackPawnCameBackEvent.setArrived(new Date());
+								lastMoveBlackPawnCameBackEvent.setClazz("LastMoveBlackPawnCameBackEvent");
+								lastMoveBlackPawnCameBackEvent.setUserName(username);
+								lastMoveBlackPawnCameBackEvent.setGameRoomName(gameRoomName);
+								lastMoveBlackPawnCameBackEvent.setFrom(from);
+								lastMoveBlackPawnCameBackEvent.setTo(to);
+								lastMoveBlackPawnCameBackEvent.setBoard(backgammonGameService.getBoard(gameRoomName));
+								lastMoveBlackPawnCameBackEvent.setFirstDice(backgammonGameService.getFirstDice(gameRoomName));
+								lastMoveBlackPawnCameBackEvent.setSecondDice(backgammonGameService.getSecondDice(gameRoomName));
+								lastMoveBlackPawnCameBackEvent.setWhite(backgammonGameService.getIsWhite(gameRoomName, username));
+								
+								consumerToProducer.get(LastMoveBlackPawnCameBackEvent.class).getEventsQueue().put(lastMoveBlackPawnCameBackEvent);
 								
 								backgammonGameService.passTurn(gameRoomName);
 							}

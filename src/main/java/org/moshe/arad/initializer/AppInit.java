@@ -25,7 +25,9 @@ import org.moshe.arad.kafka.events.BlackPawnTakenOutEvent;
 import org.moshe.arad.kafka.events.DiceRolledEvent;
 import org.moshe.arad.kafka.events.GameStartedEvent;
 import org.moshe.arad.kafka.events.InitDiceCompletedEvent;
+import org.moshe.arad.kafka.events.LastMoveBlackPawnCameBackEvent;
 import org.moshe.arad.kafka.events.LastMoveWhitePawnCameBackEvent;
+import org.moshe.arad.kafka.events.TurnNotPassedBlackPawnCameBackEvent;
 import org.moshe.arad.kafka.events.TurnNotPassedWhitePawnCameBackEvent;
 import org.moshe.arad.kafka.events.UserMadeInvalidMoveEvent;
 import org.moshe.arad.kafka.events.UserMadeMoveEvent;
@@ -104,6 +106,12 @@ public class AppInit implements ApplicationContextAware, IAppInitializer {
 	@Autowired
 	private SimpleEventsProducer<TurnNotPassedWhitePawnCameBackEvent> turnNotPassedWhitePawnCameBackEventProducer;
 	
+	@Autowired
+	private SimpleEventsProducer<LastMoveBlackPawnCameBackEvent> lastMoveBlackPawnCameBackEventProducer;
+	
+	@Autowired
+	private SimpleEventsProducer<TurnNotPassedBlackPawnCameBackEvent> turnNotPassedBlackPawnCameBackEventProducer;
+	
 	private ConsumerToProducerQueue initGameRoomCompletedEventQueue;
 	
 	private ConsumerToProducerQueue rollDiceCommandQueue;
@@ -130,6 +138,10 @@ public class AppInit implements ApplicationContextAware, IAppInitializer {
 	
 	private ConsumerToProducerQueue turnNotPassedWhitePawnCameBackEventQueue;
 	
+	private ConsumerToProducerQueue lastMoveBlackPawnCameBackEventQueue;
+	
+	private ConsumerToProducerQueue turnNotPassedBlackPawnCameBackEventQueue;
+	
 	private ExecutorService executor = Executors.newFixedThreadPool(6);
 	
 	private Logger logger = LoggerFactory.getLogger(AppInit.class);
@@ -152,6 +164,8 @@ public class AppInit implements ApplicationContextAware, IAppInitializer {
 		userMadeMoveEventQueue = context.getBean(ConsumerToProducerQueue.class);
 		lastMoveWhitePawnCameBackEventQueue = context.getBean(ConsumerToProducerQueue.class);
 		turnNotPassedWhitePawnCameBackEventQueue = context.getBean(ConsumerToProducerQueue.class);
+		lastMoveBlackPawnCameBackEventQueue = context.getBean(ConsumerToProducerQueue.class);
+		turnNotPassedBlackPawnCameBackEventQueue = context.getBean(ConsumerToProducerQueue.class);
 		
 		for(int i=0; i<NUM_CONSUMERS; i++){
 			rollDiceCommandConsumer = context.getBean(RollDiceCommandConsumer.class);
@@ -170,6 +184,8 @@ public class AppInit implements ApplicationContextAware, IAppInitializer {
 			queueMap.put(UserMadeMoveEvent.class, userMadeMoveEventQueue);
 			queueMap.put(LastMoveWhitePawnCameBackEvent.class, lastMoveWhitePawnCameBackEventQueue);
 			queueMap.put(TurnNotPassedWhitePawnCameBackEvent.class, turnNotPassedWhitePawnCameBackEventQueue);
+			queueMap.put(LastMoveBlackPawnCameBackEvent.class, lastMoveBlackPawnCameBackEventQueue);
+			queueMap.put(TurnNotPassedBlackPawnCameBackEvent.class, turnNotPassedBlackPawnCameBackEventQueue);
 			makeMoveCommandConsumer.setConsumerToProducer(queueMap);
 			
 			initSingleConsumer(makeMoveCommandConsumer, KafkaUtils.MAKE_MOVE_COMMAND_TOPIC, makeMoveCommandConfig, null);
@@ -230,6 +246,10 @@ public class AppInit implements ApplicationContextAware, IAppInitializer {
 	
 		initSingleProducer(turnNotPassedWhitePawnCameBackEventProducer, KafkaUtils.TURN_NOT_PASSED_WHITE_PAWN_CAME_BACK_EVENT_TOPIC, turnNotPassedWhitePawnCameBackEventQueue);
 		
+		initSingleProducer(lastMoveBlackPawnCameBackEventProducer, KafkaUtils.LAST_MOVE_BLACK_PAWN_CAME_BACK_EVENT_TOPIC, lastMoveBlackPawnCameBackEventQueue);
+		
+		initSingleProducer(turnNotPassedBlackPawnCameBackEventProducer, KafkaUtils.TURN_NOT_PASSED_BLACK_PAWN_CAME_BACK_EVENT_TOPIC, turnNotPassedBlackPawnCameBackEventQueue);
+		
 		executeProducersAndConsumers(Arrays.asList(gameStartedEventEventProducer,
 				initDiceCompletedEventProducer,
 				diceRolledEventProducer,
@@ -242,7 +262,9 @@ public class AppInit implements ApplicationContextAware, IAppInitializer {
 				whiteAteBlackPawnEventProducer,
 				userMadeMoveEventProducer,
 				lastMoveWhitePawnCameBackEventProducer,
-				turnNotPassedWhitePawnCameBackEventProducer));
+				turnNotPassedWhitePawnCameBackEventProducer,
+				lastMoveBlackPawnCameBackEventProducer,
+				turnNotPassedBlackPawnCameBackEventProducer));
 	}
 
 	@Override
