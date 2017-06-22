@@ -25,10 +25,12 @@ import org.moshe.arad.kafka.events.BlackPawnTakenOutEvent;
 import org.moshe.arad.kafka.events.DiceRolledEvent;
 import org.moshe.arad.kafka.events.GameStartedEvent;
 import org.moshe.arad.kafka.events.InitDiceCompletedEvent;
+import org.moshe.arad.kafka.events.LastMoveBlackAteWhitePawnEvent;
 import org.moshe.arad.kafka.events.LastMoveBlackPawnCameBackEvent;
 import org.moshe.arad.kafka.events.LastMoveBlackPawnTakenOutEvent;
 import org.moshe.arad.kafka.events.LastMoveWhitePawnCameBackEvent;
 import org.moshe.arad.kafka.events.LastMoveWhitePawnTakenOutEvent;
+import org.moshe.arad.kafka.events.TurnNotPassedBlackAteWhitePawnEvent;
 import org.moshe.arad.kafka.events.TurnNotPassedBlackPawnCameBackEvent;
 import org.moshe.arad.kafka.events.TurnNotPassedBlackPawnTakenOutEvent;
 import org.moshe.arad.kafka.events.TurnNotPassedWhitePawnCameBackEvent;
@@ -128,6 +130,12 @@ public class AppInit implements ApplicationContextAware, IAppInitializer {
 	@Autowired
 	private SimpleEventsProducer<TurnNotPassedBlackPawnTakenOutEvent> turnNotPassedBlackPawnTakenOutEventProducer;
 	
+	@Autowired
+	private SimpleEventsProducer<LastMoveBlackAteWhitePawnEvent> lastMoveBlackAteWhitePawnEventProducer;
+	
+	@Autowired
+	private SimpleEventsProducer<TurnNotPassedBlackAteWhitePawnEvent> turnNotPassedBlackAteWhitePawnEventProducer;
+	
 	private ConsumerToProducerQueue initGameRoomCompletedEventQueue;
 	
 	private ConsumerToProducerQueue rollDiceCommandQueue;
@@ -166,6 +174,10 @@ public class AppInit implements ApplicationContextAware, IAppInitializer {
 	
 	private ConsumerToProducerQueue turnNotPassedBlackPawnTakenOutEventQueue;
 	
+	private ConsumerToProducerQueue lastMoveBlackAteWhitePawnEventQueue;
+	
+	private ConsumerToProducerQueue turnNotPassedBlackAteWhitePawnEventQueue;
+	
 	private ExecutorService executor = Executors.newFixedThreadPool(6);
 	
 	private Logger logger = LoggerFactory.getLogger(AppInit.class);
@@ -194,6 +206,8 @@ public class AppInit implements ApplicationContextAware, IAppInitializer {
 		turnNotPassedWhitePawnTakenOutEventQueue = context.getBean(ConsumerToProducerQueue.class);
 		lastMoveBlackPawnTakenOutEventQueue = context.getBean(ConsumerToProducerQueue.class);
 		turnNotPassedBlackPawnTakenOutEventQueue = context.getBean(ConsumerToProducerQueue.class);
+		lastMoveBlackAteWhitePawnEventQueue = context.getBean(ConsumerToProducerQueue.class);
+		turnNotPassedBlackAteWhitePawnEventQueue = context.getBean(ConsumerToProducerQueue.class);
 		
 		for(int i=0; i<NUM_CONSUMERS; i++){
 			rollDiceCommandConsumer = context.getBean(RollDiceCommandConsumer.class);
@@ -218,6 +232,8 @@ public class AppInit implements ApplicationContextAware, IAppInitializer {
 			queueMap.put(TurnNotPassedWhitePawnTakenOutEvent.class, turnNotPassedWhitePawnTakenOutEventQueue);
 			queueMap.put(LastMoveBlackPawnTakenOutEvent.class, lastMoveBlackPawnTakenOutEventQueue);
 			queueMap.put(TurnNotPassedBlackPawnTakenOutEvent.class, turnNotPassedBlackPawnTakenOutEventQueue);
+			queueMap.put(LastMoveBlackAteWhitePawnEvent.class, lastMoveBlackAteWhitePawnEventQueue);
+			queueMap.put(TurnNotPassedBlackAteWhitePawnEvent.class, turnNotPassedBlackAteWhitePawnEventQueue);
 			makeMoveCommandConsumer.setConsumerToProducer(queueMap);
 			
 			initSingleConsumer(makeMoveCommandConsumer, KafkaUtils.MAKE_MOVE_COMMAND_TOPIC, makeMoveCommandConfig, null);
@@ -290,6 +306,10 @@ public class AppInit implements ApplicationContextAware, IAppInitializer {
 		
 		initSingleProducer(turnNotPassedBlackPawnTakenOutEventProducer, KafkaUtils.TURN_NOT_PASSED_BLACK_PAWN_TAKEN_OUT_EVENT_TOPIC, turnNotPassedBlackPawnTakenOutEventQueue);
 		
+		initSingleProducer(lastMoveBlackAteWhitePawnEventProducer, KafkaUtils.LAST_MOVE_BLACK_ATE_WHITE_PAWN_EVENT_TOPIC, lastMoveBlackAteWhitePawnEventQueue);
+		
+		initSingleProducer(turnNotPassedBlackAteWhitePawnEventProducer, KafkaUtils.TURN_NOT_PASSED_BLACK_ATE_WHITE_PAWN_EVENT_TOPIC, turnNotPassedBlackAteWhitePawnEventQueue);
+		
 		executeProducersAndConsumers(Arrays.asList(gameStartedEventEventProducer,
 				initDiceCompletedEventProducer,
 				diceRolledEventProducer,
@@ -308,7 +328,9 @@ public class AppInit implements ApplicationContextAware, IAppInitializer {
 				lastMoveWhitePawnTakenOutEventProducer,
 				turnNotPassedWhitePawnTakenOutEventProducer,
 				lastMoveBlackPawnTakenOutEventProducer,
-				turnNotPassedBlackPawnTakenOutEventProducer));
+				turnNotPassedBlackPawnTakenOutEventProducer,
+				lastMoveBlackAteWhitePawnEventProducer,
+				turnNotPassedBlackAteWhitePawnEventProducer));
 	}
 
 	@Override
