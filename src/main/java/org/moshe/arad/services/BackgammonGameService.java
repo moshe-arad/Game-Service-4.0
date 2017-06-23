@@ -117,8 +117,8 @@ public class BackgammonGameService {
 		logger.info("The board before making move:");
 		logger.info(board.toString());
 		
-		int eatenWhite = board.getWhiteEatenSize();
-		int eatenBlack = board.getBlackEatenSize();
+		int eatenWhite = board.whiteEatenSize();
+		int eatenBlack = board.blackEatenSize();
 		logger.info("Before applying move, white has eaten = " + eatenWhite);
 		logger.info("Before applying move, black has eaten = " + eatenBlack);			
 		
@@ -169,12 +169,12 @@ public class BackgammonGameService {
 	
 	public int getWhiteEatenNum(String gameRoomName){
 		Backgammon backgammon = backgammonGames.get(gameRoomName);		
-		return backgammon.getBoard().getWhiteEatenSize();
+		return backgammon.getBoard().whiteEatenSize();
 	}
 	
 	public int getBlackEatenNum(String gameRoomName){
 		Backgammon backgammon = backgammonGames.get(gameRoomName);		
-		return backgammon.getBoard().getBlackEatenSize();
+		return backgammon.getBoard().blackEatenSize();
 	}
 	
 	public boolean isHasWinner(String gameRoomName) throws Exception{
@@ -190,14 +190,14 @@ public class BackgammonGameService {
 		Backgammon backgammon = backgammonGames.get(gameRoomName);
 		BackgammonBoard board = backgammon.getBoard();
 		
-		return board.isWhiteCanPlay();
+		return board.whiteCanPlay();
 	}
 	
 	public boolean isBlackCanPlay(String gameRoomName) throws Exception{
 		Backgammon backgammon = backgammonGames.get(gameRoomName);
 		BackgammonBoard board = backgammon.getBoard();
 		
-		return board.isBlackCanPlay();
+		return board.blackCanPlay();
 	}
 	
 	public void passTurn(String gameRoomName){

@@ -2,9 +2,11 @@ package org.moshe.arad.backgammon.instrument;
 
 import org.moshe.arad.backgammon.move.BackgammonBoardLocation;
 import org.moshe.arad.backgammon.move.Move;
+import org.springframework.stereotype.Component;
 
-public class WhiteBackgammonPawn extends BackgammonPawn{
-
+@Component
+public class WhiteBackgammonPawn extends BackgammonPawn  implements Pawn{
+	
 	@Override
 	public boolean isAbleToDo(Move move) throws Exception {
 		if(move == null) throw new Exception("move is null.");

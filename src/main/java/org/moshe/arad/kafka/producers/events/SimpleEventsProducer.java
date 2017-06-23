@@ -84,7 +84,7 @@ public class SimpleEventsProducer <T extends BackgammonEvent> implements ISimple
 	}
 
 	private String convertEventIntoJsonBlob(T event){
-		ObjectMapper objectMapper = new ObjectMapper();
+		ObjectMapper objectMapper = new ObjectMapper();		
 		try {
 			return objectMapper.writeValueAsString(event);
 		} catch (JsonProcessingException e) {

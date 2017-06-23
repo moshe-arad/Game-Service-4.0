@@ -16,7 +16,6 @@ import org.moshe.arad.backgammon.turn.BackgammonTurn;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class BackgammonBoard implements Board {
 
 	public static final int LENGTH = 24;
@@ -176,7 +175,7 @@ public class BackgammonBoard implements Board {
 		}
 	}
 
-	public boolean isWhiteCanPlay() throws Exception{
+	public boolean whiteCanPlay() throws Exception{
 		if(eatenWhites.size() > 0){
 			for(int i=0; i<7; i++){
 				if(this.getSizeOfColumn(new BackgammonBoardLocation(i)) <= 1 && 
@@ -189,7 +188,7 @@ public class BackgammonBoard implements Board {
 		else return true;
 	}
 	
-	public boolean isBlackCanPlay() throws Exception{
+	public boolean blackCanPlay() throws Exception{
 		if(eatenBlacks.size() > 0){
 			for(int i=23; i>17; i--){
 				if(this.getSizeOfColumn(new BackgammonBoardLocation(i)) <= 1 &&
@@ -329,14 +328,62 @@ public class BackgammonBoard implements Board {
 		eatenWhites.add(pawn);
 	}
 	
-	public int getBlackEatenSize(){
+	public int blackEatenSize(){
 		return eatenBlacks.size();
 	}
 	
-	public int getWhiteEatenSize(){
+	public int whiteEatenSize(){
 		return eatenWhites.size();
 	}
 	
+	public List<Deque<BackgammonPawn>> getBoard() {
+		return board;
+	}
+
+	public void setBoard(List<Deque<BackgammonPawn>> board) {
+		this.board = board;
+	}
+
+	public LinkedList<BackgammonPawn> getEatenBlacks() {
+		return eatenBlacks;
+	}
+
+	public void setEatenBlacks(LinkedList<BackgammonPawn> eatenBlacks) {
+		this.eatenBlacks = eatenBlacks;
+	}
+
+	public LinkedList<BackgammonPawn> getEatenWhites() {
+		return eatenWhites;
+	}
+
+	public void setEatenWhites(LinkedList<BackgammonPawn> eatenWhites) {
+		this.eatenWhites = eatenWhites;
+	}
+
+	public static int getLength() {
+		return LENGTH;
+	}
+
+	public static int getMaxColumn() {
+		return MAX_COLUMN;
+	}
+
+	public static int getEatenWhite() {
+		return EATEN_WHITE;
+	}
+
+	public static int getEatenBlack() {
+		return EATEN_BLACK;
+	}
+
+	public static int getOutWhite() {
+		return OUT_WHITE;
+	}
+
+	public static int getOutBlack() {
+		return OUT_BLACK;
+	}
+
 	private boolean isCanSetOnDestination(int locationIndex, BackgammonPawn backgammonPawn) {
 		return (board.get(locationIndex).size() > 0) && (board.get(locationIndex).peek() != null) && (!board.get(locationIndex).peek().equals(backgammonPawn)) ? false : true;
 	}
