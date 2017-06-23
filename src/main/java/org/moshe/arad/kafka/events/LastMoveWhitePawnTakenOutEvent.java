@@ -2,6 +2,7 @@ package org.moshe.arad.kafka.events;
 
 import org.moshe.arad.backgammon.instrument.BackgammonBoard;
 import org.moshe.arad.backgammon.instrument.BackgammonDice;
+import org.moshe.arad.backgammon.json.BackgammonBoardJson;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -13,7 +14,7 @@ public class LastMoveWhitePawnTakenOutEvent extends BackgammonEvent{
 	private String gameRoomName;
 	private int from;
 	private int to;
-	private BackgammonBoard board;
+	private BackgammonBoardJson backgammonBoardJson;
 	private BackgammonDice firstDice;
 	private BackgammonDice secondDice;
 	private boolean isWhite;
@@ -22,14 +23,15 @@ public class LastMoveWhitePawnTakenOutEvent extends BackgammonEvent{
 	
 	}
 
-	public LastMoveWhitePawnTakenOutEvent(String userName, String gameRoomName, int from, int to, BackgammonBoard board,
-			BackgammonDice firstDice, BackgammonDice secondDice, boolean isWhite) {
+	public LastMoveWhitePawnTakenOutEvent(String userName, String gameRoomName, int from, int to,
+			BackgammonBoardJson backgammonBoardJson, BackgammonDice firstDice, BackgammonDice secondDice,
+			boolean isWhite) {
 		super();
 		this.userName = userName;
 		this.gameRoomName = gameRoomName;
 		this.from = from;
 		this.to = to;
-		this.board = board;
+		this.backgammonBoardJson = backgammonBoardJson;
 		this.firstDice = firstDice;
 		this.secondDice = secondDice;
 		this.isWhite = isWhite;
@@ -38,8 +40,8 @@ public class LastMoveWhitePawnTakenOutEvent extends BackgammonEvent{
 	@Override
 	public String toString() {
 		return "LastMoveWhitePawnTakenOutEvent [userName=" + userName + ", gameRoomName=" + gameRoomName + ", from="
-				+ from + ", to=" + to + ", board=" + board + ", firstDice=" + firstDice + ", secondDice=" + secondDice
-				+ ", isWhite=" + isWhite + "]";
+				+ from + ", to=" + to + ", backgammonBoardJson=" + backgammonBoardJson + ", firstDice=" + firstDice
+				+ ", secondDice=" + secondDice + ", isWhite=" + isWhite + "]";
 	}
 
 	public String getUserName() {
@@ -74,12 +76,12 @@ public class LastMoveWhitePawnTakenOutEvent extends BackgammonEvent{
 		this.to = to;
 	}
 
-	public BackgammonBoard getBoard() {
-		return board;
+	public BackgammonBoardJson getBackgammonBoardJson() {
+		return backgammonBoardJson;
 	}
 
-	public void setBoard(BackgammonBoard board) {
-		this.board = board;
+	public void setBackgammonBoardJson(BackgammonBoardJson backgammonBoardJson) {
+		this.backgammonBoardJson = backgammonBoardJson;
 	}
 
 	public BackgammonDice getFirstDice() {
