@@ -23,7 +23,11 @@ public class Backgammon {
 	private BackgammonPlayer firstPlayer;
 	private BackgammonPlayer secondPlayer;
 	
-	private Backgammon(BackgammonPlayer first, 
+	public Backgammon() {
+	
+	}
+	
+	public Backgammon(BackgammonPlayer first, 
 			BackgammonPlayer second,
 			@Autowired BackgammonTurn turn,
 			@Autowired ClassicGameTurnOrderManager<BackgammonPlayer> turnManager,

@@ -6,8 +6,12 @@ import org.moshe.arad.backgammon.instrument.Dice;
 import org.moshe.arad.backgammon.move.Move;
 import org.moshe.arad.backgammon.turn.BackgammonTurn;
 import org.moshe.arad.backgammon.turn.Turn;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 import org.moshe.arad.backgammon.move.BackgammonBoardLocation;
 
+@Component
+@Scope("prototype")
 public class BackgammonPlayer extends ClassicGamePlayer {
 
 	private String firstName;
@@ -17,6 +21,9 @@ public class BackgammonPlayer extends ClassicGamePlayer {
 	private BackgammonTurn turn;
 	private boolean isWhite;
 
+	public BackgammonPlayer() {
+	
+	}
 	
 	public BackgammonPlayer(String firstName, String lastName, int age, BackgammonTurn turn,
 			boolean isWhite) {
@@ -84,6 +91,10 @@ public class BackgammonPlayer extends ClassicGamePlayer {
 
 	public void setLastName(String lastName) {
 		this.lastName = lastName;
+	}
+
+	public void setWhite(boolean isWhite) {
+		this.isWhite = isWhite;
 	}
 
 	private void doubleDices() {

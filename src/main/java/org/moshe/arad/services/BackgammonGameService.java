@@ -1,6 +1,8 @@
 package org.moshe.arad.services;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 
 import org.moshe.arad.backgammon.Backgammon;
@@ -10,6 +12,8 @@ import org.moshe.arad.backgammon.move.BackgammonBoardLocation;
 import org.moshe.arad.backgammon.move.Move;
 import org.moshe.arad.backgammon.player.BackgammonPlayer;
 import org.moshe.arad.backgammon.player.Player;
+import org.moshe.arad.backgammon.turn.BackgammonTurn;
+import org.moshe.arad.backgammon.turn.ClassicGameTurnOrderManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,8 +33,31 @@ public class BackgammonGameService {
 	
 	public void createNewGame(String gameRoomName, String openBy, String second){
 		Backgammon backgammon = context.getBean(Backgammon.class);
-		backgammon.getFirstPlayer().setFirstName(openBy);
-		backgammon.getSecondPlayer().setFirstName(second);
+		BackgammonTurn turn = context.getBean(BackgammonTurn.class);
+		ClassicGameTurnOrderManager<BackgammonPlayer> turnManager = context.getBean(ClassicGameTurnOrderManager.class);
+		BackgammonBoard board = context.getBean(BackgammonBoard.class);
+		BackgammonPlayer firstPlayer = context.getBean(BackgammonPlayer.class);
+		BackgammonPlayer secondPlayer = context.getBean(BackgammonPlayer.class);
+		
+		firstPlayer.setFirstName(openBy);
+		firstPlayer.setWhite(true);
+		secondPlayer.setFirstName(second);
+		firstPlayer.setTurn(turn);
+		
+		LinkedList<BackgammonPlayer> order = new LinkedList<>();
+		order.add(firstPlayer);
+		order.add(secondPlayer);
+		
+		turnManager.setOrder(order);
+		
+		backgammon.setFirstPlayer(firstPlayer);
+		backgammon.setSecondPlayer(secondPlayer);
+		
+		backgammon.setTurnManager(turnManager);
+		
+		board.initBoard();
+		backgammon.setBoard(board);
+		
 		backgammonGames.put(gameRoomName, backgammon);
 	}
 	
