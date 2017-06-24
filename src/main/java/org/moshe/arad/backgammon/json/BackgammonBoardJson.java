@@ -73,8 +73,8 @@ public class BackgammonBoardJson {
 			}
 		}
 		
-		eatenWhiteCount = board.getEatenWhite();
-		eatenBlackCount = board.getEatenBlack();	
+		eatenWhiteCount = board.getEatenWhites().size();
+		eatenBlackCount = board.getEatenBlacks().size();	
 
 	}
 	
