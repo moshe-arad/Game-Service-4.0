@@ -1,8 +1,10 @@
 package org.moshe.arad.backgammon.move;
 
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 @Component
+@Scope("prototype")
 public class BackgammonBoardLocation implements BoardLocation{
 
 	private Integer index;
