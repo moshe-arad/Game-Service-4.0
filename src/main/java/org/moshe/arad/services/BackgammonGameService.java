@@ -75,9 +75,7 @@ public class BackgammonGameService {
 	
 	public void rollDice(String gameRoomName){
 		BackgammonPlayer player = backgammonGames.get(gameRoomName).getTurnManager().howHasTurn();
-		
-		player.getTurn().getFirstDice().rollDice();
-		player.getTurn().getSecondDice().rollDice();
+		player.rollDices();
 	}
 	
 	public BackgammonDice getFirstDice(String gameRoomName){

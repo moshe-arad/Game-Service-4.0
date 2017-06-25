@@ -69,18 +69,14 @@ public class MakeMoveCommandConsumer extends SimpleCommandsConsumer {
 		int whiteEaten = backgammonGameService.getWhiteEatenNum(gameRoomName);
 		int blackEaten = backgammonGameService.getBlackEatenNum(gameRoomName);
 		
-		//TODO notify to view about eaten pawns
 		if(backgammonGameService.isUserWithTurn(gameRoomName, username)){
 			try {
 				
 				if(backgammonGameService.makeMove(username, gameRoomName, from, to)){
 					logger.info("The move was made..");
 					
-					//if has winner, then handle: winner move made + end game
+					//TODO if has winner, then handle: winner move made + end game
 					
-					
-					//TODO handle eat move events + take out events
-					//TODO handle can not play because of eaten can come back
 					if(backgammonGameService.isCanKeepPlay(gameRoomName, username)){
 						if(from == BackgammonBoard.EATEN_WHITE){
 							logger.info("White player returned a white pawn into the game...");
@@ -215,19 +211,11 @@ public class MakeMoveCommandConsumer extends SimpleCommandsConsumer {
 							
 							consumerToProducer.get(UserMadeMoveEvent.class).getEventsQueue().put(userMadeMoveEvent);
 						}
-						//if from = 24 || -1, then handle: eaten pawn came back event // done
-						//if to = 24 || -1, then handle: pawn taken was out event //done
-						
-						//if eaten grew by one then handle: pawn was eaten //done
-						
-						//**************************************
-						//handle user Made Move //done
-						//**************************************
 					}
 					else{
-						if((backgammonGameService.getIsWhite(gameRoomName, username) && backgammonGameService.isWhiteCanPlay(gameRoomName)) ||
-								(!backgammonGameService.getIsWhite(gameRoomName, username) && backgammonGameService.isBlackCanPlay(gameRoomName))){
-							//turn not passed
+						if((backgammonGameService.getIsWhite(gameRoomName, username) && !backgammonGameService.isBlackCanPlay(gameRoomName)) ||
+								(!backgammonGameService.getIsWhite(gameRoomName, username) && !backgammonGameService.isWhiteCanPlay(gameRoomName))){
+				
 							if(from == BackgammonBoard.EATEN_WHITE){
 								logger.info("White player returned a white pawn into the game...");
 								TurnNotPassedWhitePawnCameBackEvent turnNotPassedWhitePawnCameBackEvent = context.getBean(TurnNotPassedWhitePawnCameBackEvent.class);
@@ -363,7 +351,6 @@ public class MakeMoveCommandConsumer extends SimpleCommandsConsumer {
 							}
 						}
 						else{
-							//turn passed
 							if(from == BackgammonBoard.EATEN_WHITE){
 								logger.info("White player returned a white pawn into the game...");
 								LastMoveWhitePawnCameBackEvent lastMoveWhitePawnCameBackEvent = context.getBean(LastMoveWhitePawnCameBackEvent.class);
@@ -512,15 +499,6 @@ public class MakeMoveCommandConsumer extends SimpleCommandsConsumer {
 								backgammonGameService.passTurn(gameRoomName);
 							}
 						}
-						//if from = 24 || -1, then handle: eaten pawn came back event
-						//if to = 24 || -1, then handle: pawn taken was out event
-						
-						//if eaten grew by one then handle: pawn was eaten
-						
-						//**************************************
-						//handle user Made Last Move event + 
-						// pass turn event ##only if## next player can make move. if can not save: move not made event  
-						//**************************************
 					}
 				}
 				else{
