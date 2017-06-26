@@ -17,6 +17,7 @@ import org.moshe.arad.kafka.events.LastMoveBlackAteWhitePawnEvent;
 import org.moshe.arad.kafka.events.LastMoveBlackPawnCameBackEvent;
 import org.moshe.arad.kafka.events.LastMoveBlackPawnTakenOutEvent;
 import org.moshe.arad.kafka.events.LastMoveWhiteAteBlackPawnEvent;
+import org.moshe.arad.kafka.events.LastMoveWhitePawnCameBackAndAteBlackPawnEvent;
 import org.moshe.arad.kafka.events.LastMoveWhitePawnCameBackEvent;
 import org.moshe.arad.kafka.events.LastMoveWhitePawnTakenOutEvent;
 import org.moshe.arad.kafka.events.TurnNotPassedBlackAteWhitePawnEvent;
@@ -24,6 +25,7 @@ import org.moshe.arad.kafka.events.TurnNotPassedBlackPawnCameBackEvent;
 import org.moshe.arad.kafka.events.TurnNotPassedBlackPawnTakenOutEvent;
 import org.moshe.arad.kafka.events.TurnNotPassedUserMadeMoveEvent;
 import org.moshe.arad.kafka.events.TurnNotPassedWhiteAteBlackPawnEvent;
+import org.moshe.arad.kafka.events.TurnNotPassedWhitePawnCameBackAndAteBlackPawnEvent;
 import org.moshe.arad.kafka.events.TurnNotPassedWhitePawnCameBackEvent;
 import org.moshe.arad.kafka.events.TurnNotPassedWhitePawnTakenOutEvent;
 import org.moshe.arad.kafka.events.UserMadeInvalidMoveEvent;
@@ -236,7 +238,26 @@ public class MakeMoveCommandConsumer extends SimpleCommandsConsumer {
 						if((backgammonGameService.getIsWhite(gameRoomName, username) && !backgammonGameService.isBlackCanPlay(gameRoomName)) ||
 								(!backgammonGameService.getIsWhite(gameRoomName, username) && !backgammonGameService.isWhiteCanPlay(gameRoomName))){
 				
-							if(from == BackgammonBoard.EATEN_WHITE){
+							if((from == BackgammonBoard.EATEN_WHITE) && ((blackEaten + 1) == backgammonGameService.getBlackEatenNum(gameRoomName))){
+								logger.info("White player returned a white pawn into the game...");
+								TurnNotPassedWhitePawnCameBackAndAteBlackPawnEvent turnNotPassedWhitePawnCameBackAndAteBlackPawnEvent = context.getBean(TurnNotPassedWhitePawnCameBackAndAteBlackPawnEvent.class);
+								turnNotPassedWhitePawnCameBackAndAteBlackPawnEvent.setUuid(makeMoveCommand.getUuid());
+								turnNotPassedWhitePawnCameBackAndAteBlackPawnEvent.setArrived(new Date());
+								turnNotPassedWhitePawnCameBackAndAteBlackPawnEvent.setClazz("TurnNotPassedWhitePawnCameBackAndAteBlackPawnEvent");
+								turnNotPassedWhitePawnCameBackAndAteBlackPawnEvent.setUserName(username);
+								turnNotPassedWhitePawnCameBackAndAteBlackPawnEvent.setGameRoomName(gameRoomName);
+								turnNotPassedWhitePawnCameBackAndAteBlackPawnEvent.setFrom(from);
+								turnNotPassedWhitePawnCameBackAndAteBlackPawnEvent.setTo(to);
+								BackgammonBoardJson backgammonBoardJson = context.getBean(BackgammonBoardJson.class);
+								backgammonBoardJson.initBoard(backgammonGameService.getBoard(gameRoomName));
+								turnNotPassedWhitePawnCameBackAndAteBlackPawnEvent.setBackgammonBoardJson(backgammonBoardJson);
+								turnNotPassedWhitePawnCameBackAndAteBlackPawnEvent.setFirstDice(backgammonGameService.getFirstDice(gameRoomName));
+								turnNotPassedWhitePawnCameBackAndAteBlackPawnEvent.setSecondDice(backgammonGameService.getSecondDice(gameRoomName));
+								turnNotPassedWhitePawnCameBackAndAteBlackPawnEvent.setWhite(backgammonGameService.getIsWhite(gameRoomName, username));
+								
+								consumerToProducer.get(TurnNotPassedWhitePawnCameBackAndAteBlackPawnEvent.class).getEventsQueue().put(turnNotPassedWhitePawnCameBackAndAteBlackPawnEvent);
+							}
+							else if(from == BackgammonBoard.EATEN_WHITE){
 								logger.info("White player returned a white pawn into the game...");
 								TurnNotPassedWhitePawnCameBackEvent turnNotPassedWhitePawnCameBackEvent = context.getBean(TurnNotPassedWhitePawnCameBackEvent.class);
 								turnNotPassedWhitePawnCameBackEvent.setUuid(makeMoveCommand.getUuid());
@@ -371,7 +392,28 @@ public class MakeMoveCommandConsumer extends SimpleCommandsConsumer {
 							}
 						}
 						else{
-							if(from == BackgammonBoard.EATEN_WHITE){
+							if((from == BackgammonBoard.EATEN_WHITE) && ((blackEaten + 1) == backgammonGameService.getBlackEatenNum(gameRoomName))){
+								logger.info("White player returned a white pawn into the game...");
+								LastMoveWhitePawnCameBackAndAteBlackPawnEvent lastMoveWhitePawnCameBackAndAteBlackPawnEvent = context.getBean(LastMoveWhitePawnCameBackAndAteBlackPawnEvent.class);
+								lastMoveWhitePawnCameBackAndAteBlackPawnEvent.setUuid(makeMoveCommand.getUuid());
+								lastMoveWhitePawnCameBackAndAteBlackPawnEvent.setArrived(new Date());
+								lastMoveWhitePawnCameBackAndAteBlackPawnEvent.setClazz("LastMoveWhitePawnCameBackAndAteBlackPawnEvent");
+								lastMoveWhitePawnCameBackAndAteBlackPawnEvent.setUserName(username);
+								lastMoveWhitePawnCameBackAndAteBlackPawnEvent.setGameRoomName(gameRoomName);
+								lastMoveWhitePawnCameBackAndAteBlackPawnEvent.setFrom(from);
+								lastMoveWhitePawnCameBackAndAteBlackPawnEvent.setTo(to);
+								BackgammonBoardJson backgammonBoardJson = context.getBean(BackgammonBoardJson.class);
+								backgammonBoardJson.initBoard(backgammonGameService.getBoard(gameRoomName));
+								lastMoveWhitePawnCameBackAndAteBlackPawnEvent.setBackgammonBoardJson(backgammonBoardJson);
+								lastMoveWhitePawnCameBackAndAteBlackPawnEvent.setFirstDice(backgammonGameService.getFirstDice(gameRoomName));
+								lastMoveWhitePawnCameBackAndAteBlackPawnEvent.setSecondDice(backgammonGameService.getSecondDice(gameRoomName));
+								lastMoveWhitePawnCameBackAndAteBlackPawnEvent.setWhite(backgammonGameService.getIsWhite(gameRoomName, username));
+								
+								consumerToProducer.get(LastMoveWhitePawnCameBackAndAteBlackPawnEvent.class).getEventsQueue().put(lastMoveWhitePawnCameBackAndAteBlackPawnEvent);
+								
+								backgammonGameService.passTurn(gameRoomName);
+							}
+							else if(from == BackgammonBoard.EATEN_WHITE){
 								logger.info("White player returned a white pawn into the game...");
 								LastMoveWhitePawnCameBackEvent lastMoveWhitePawnCameBackEvent = context.getBean(LastMoveWhitePawnCameBackEvent.class);
 								lastMoveWhitePawnCameBackEvent.setUuid(makeMoveCommand.getUuid());
