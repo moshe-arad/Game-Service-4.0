@@ -175,30 +175,32 @@ public class BackgammonBoard implements Board {
 		}
 	}
 
-	public boolean whiteCanPlay() throws Exception{
+	public boolean whiteCanPlay() throws Exception{		
 		if(eatenWhites.size() > 0){
 			for(int i=0; i<7; i++){
-				if(this.getSizeOfColumn(new BackgammonBoardLocation(i)) <= 1 && 
-						!BackgammonPawn.isWhite(this.peekAtColumn(new BackgammonBoardLocation(i)))){
+				if(!(this.getSizeOfColumn(new BackgammonBoardLocation(i)) > 1 && 
+						!BackgammonPawn.isWhite(this.peekAtColumn(new BackgammonBoardLocation(i))))){
 					return true;
 				}
 			}
-			return false;
 		}
 		else return true;
+		
+		return false;
 	}
 	
 	public boolean blackCanPlay() throws Exception{
 		if(eatenBlacks.size() > 0){
 			for(int i=23; i>17; i--){
-				if(this.getSizeOfColumn(new BackgammonBoardLocation(i)) <= 1 &&
-						BackgammonPawn.isWhite(this.peekAtColumn(new BackgammonBoardLocation(i)))){
+				if(!(this.getSizeOfColumn(new BackgammonBoardLocation(i)) > 1 &&
+						BackgammonPawn.isWhite(this.peekAtColumn(new BackgammonBoardLocation(i))))){
 					return true;
 				}
 			}
-			return false;
 		}
 		else return true;
+		
+		return false;
 	}
 	
 	@Override
