@@ -2,11 +2,14 @@ package org.moshe.arad.kafka.consumers.events;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.Map;
 
 import javax.management.RuntimeErrorException;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.moshe.arad.kafka.ConsumerToProducerQueue;
+import org.moshe.arad.kafka.events.BackgammonEvent;
+import org.moshe.arad.kafka.events.DiceRolledCanNotPlayEvent;
 import org.moshe.arad.kafka.events.DiceRolledEvent;
 import org.moshe.arad.kafka.events.GameStartedEvent;
 import org.moshe.arad.kafka.events.InitGameRoomCompletedEvent;
@@ -31,7 +34,7 @@ public class RollDiceGameRoomFoundEventConsumer extends SimpleEventsConsumer {
 	@Autowired
 	private ApplicationContext context;
 	
-	private ConsumerToProducerQueue consumerToProducerQueue;
+	private Map<Class<? extends BackgammonEvent>,ConsumerToProducerQueue> consumerToProducer;
 	
 	Logger logger = LoggerFactory.getLogger(RollDiceGameRoomFoundEventConsumer.class);
 	
@@ -47,17 +50,39 @@ public class RollDiceGameRoomFoundEventConsumer extends SimpleEventsConsumer {
 		
 		if((backgammonGameService.isWhiteTurn(gameRoomName) && whiteUserName.equals(rollDiceGameRoomFoundEvent.getUsername())) || 
 				(backgammonGameService.isBlackTurn(gameRoomName) && blackUserName.equals(rollDiceGameRoomFoundEvent.getUsername()))){
-			backgammonGameService.rollDice(gameRoomName);		
-			DiceRolledEvent diceRolledEvent = context.getBean(DiceRolledEvent.class);
-			diceRolledEvent.setUuid(rollDiceGameRoomFoundEvent.getUuid());
-			diceRolledEvent.setArrived(new Date());
-			diceRolledEvent.setClazz("DiceRolledEvent");
-			diceRolledEvent.setUsername(rollDiceGameRoomFoundEvent.getUsername());
-			diceRolledEvent.setGameRoom(rollDiceGameRoomFoundEvent.getGameRoom());
-			diceRolledEvent.setFirstDice(backgammonGameService.getFirstDice(gameRoomName));
-			diceRolledEvent.setSecondDice(backgammonGameService.getSecondDice(gameRoomName));
 			
-			consumerToProducerQueue.getEventsQueue().put(diceRolledEvent);
+			backgammonGameService.rollDice(gameRoomName);
+			try {
+				if(backgammonGameService.isCanKeepPlay(gameRoomName, rollDiceGameRoomFoundEvent.getUsername())){
+					DiceRolledEvent diceRolledEvent = context.getBean(DiceRolledEvent.class);
+					diceRolledEvent.setUuid(rollDiceGameRoomFoundEvent.getUuid());
+					diceRolledEvent.setArrived(new Date());
+					diceRolledEvent.setClazz("DiceRolledEvent");
+					diceRolledEvent.setUsername(rollDiceGameRoomFoundEvent.getUsername());
+					diceRolledEvent.setGameRoom(rollDiceGameRoomFoundEvent.getGameRoom());
+					diceRolledEvent.setFirstDice(backgammonGameService.getFirstDice(gameRoomName));
+					diceRolledEvent.setSecondDice(backgammonGameService.getSecondDice(gameRoomName));
+					
+					consumerToProducer.get(DiceRolledEvent.class).getEventsQueue().put(diceRolledEvent);
+				}
+				else{
+					backgammonGameService.passTurn(gameRoomName);
+					
+					DiceRolledCanNotPlayEvent diceRolledCanNotPlayEvent = context.getBean(DiceRolledCanNotPlayEvent.class);
+					diceRolledCanNotPlayEvent.setUuid(rollDiceGameRoomFoundEvent.getUuid());
+					diceRolledCanNotPlayEvent.setArrived(new Date());
+					diceRolledCanNotPlayEvent.setClazz("DiceRolledCanNotPlayEvent");
+					diceRolledCanNotPlayEvent.setUsername(rollDiceGameRoomFoundEvent.getUsername());
+					diceRolledCanNotPlayEvent.setGameRoom(rollDiceGameRoomFoundEvent.getGameRoom());
+					diceRolledCanNotPlayEvent.setFirstDice(backgammonGameService.getFirstDice(gameRoomName));
+					diceRolledCanNotPlayEvent.setSecondDice(backgammonGameService.getSecondDice(gameRoomName));
+					
+					consumerToProducer.get(DiceRolledCanNotPlayEvent.class).getEventsQueue().put(diceRolledCanNotPlayEvent);
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
 		}
 		else throw new RuntimeException("User don't own play turn, thus can not roll dice...");
 		
@@ -77,7 +102,14 @@ public class RollDiceGameRoomFoundEventConsumer extends SimpleEventsConsumer {
 	
 	@Override
 	public void setConsumerToProducerQueue(ConsumerToProducerQueue consumerToProducerQueue) {
-		this.consumerToProducerQueue = consumerToProducerQueue;
+		
 	}
 
+	public Map<Class<? extends BackgammonEvent>, ConsumerToProducerQueue> getConsumerToProducer() {
+		return consumerToProducer;
+	}
+
+	public void setConsumerToProducer(Map<Class<? extends BackgammonEvent>, ConsumerToProducerQueue> consumerToProducer) {
+		this.consumerToProducer = consumerToProducer;
+	}
 }
