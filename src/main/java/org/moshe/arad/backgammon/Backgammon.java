@@ -23,9 +23,11 @@ public class Backgammon {
 	private BackgammonPlayer firstPlayer;
 	private BackgammonPlayer secondPlayer;
 	private Boolean isHasWinner;
+	private Boolean isGameStopped;
 	
 	public Backgammon() {
 		isHasWinner = false;
+		isGameStopped = false;
 	}
 	
 	public Backgammon(BackgammonPlayer first, 
@@ -87,5 +89,13 @@ public class Backgammon {
 
 	public void setIsHasWinner(Boolean isHasWinner) {
 		this.isHasWinner = isHasWinner;
+	}
+
+	public Boolean getIsGameStopped() {
+		return isGameStopped;
+	}
+
+	public void setIsGameStopped(Boolean isGameStopped) {
+		this.isGameStopped = isGameStopped;
 	}
 }

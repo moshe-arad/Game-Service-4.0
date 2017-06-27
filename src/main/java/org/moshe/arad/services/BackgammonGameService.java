@@ -208,9 +208,14 @@ public class BackgammonGameService {
 		backgammon.setIsHasWinner(true);
 	}
 	
+	public void setGameStopped(String gameRoomName){
+		Backgammon backgammon = backgammonGames.get(gameRoomName);
+		backgammon.setIsGameStopped(true);
+	}
+	
 	public boolean isGamePlayable(String gameRoomName){
 		Backgammon backgammon = backgammonGames.get(gameRoomName);
-		return !backgammon.getIsHasWinner();
+		return !backgammon.getIsHasWinner() && !backgammon.getIsGameStopped();
 	}
 	
 	private Move initMove(int from, int to) {

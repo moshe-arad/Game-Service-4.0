@@ -1,9 +1,13 @@
 package org.moshe.arad.kafka.consumers.events;
 
 import java.io.IOException;
+import java.util.Date;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.moshe.arad.backgammon.json.BackgammonBoardJson;
 import org.moshe.arad.kafka.ConsumerToProducerQueue;
+import org.moshe.arad.kafka.events.GameStartedEvent;
+import org.moshe.arad.kafka.events.GameStoppedEvent;
 import org.moshe.arad.kafka.events.InitGameRoomCompletedEvent;
 import org.moshe.arad.kafka.events.LoggedOutOpenByLeftFirstEvent;
 import org.moshe.arad.services.BackgammonGameService;
@@ -39,13 +43,21 @@ public class LoggedOutOpenByLeftFirstEventConsumer extends SimpleEventsConsumer 
 		
 		try{
 			logger.info("Will stop game..." + loggedOutOpenByLeftFirstEvent);
-			logger.info("Will stop game..." + loggedOutOpenByLeftFirstEvent);
-			logger.info("Will stop game..." + loggedOutOpenByLeftFirstEvent);
-			logger.info("Will stop game..." + loggedOutOpenByLeftFirstEvent);
-			logger.info("Will stop game..." + loggedOutOpenByLeftFirstEvent);
-			logger.info("Will stop game..." + loggedOutOpenByLeftFirstEvent);
+			String gameRoomName = loggedOutOpenByLeftFirstEvent.getGameRoom().getName();
+			backgammonGameService.setGameStopped(gameRoomName);
+			GameStoppedEvent gameStoppedEvent = context.getBean(GameStoppedEvent.class);
+			gameStoppedEvent.setUuid(loggedOutOpenByLeftFirstEvent.getUuid());
+			gameStoppedEvent.setArrived(new Date());
+			gameStoppedEvent.setClazz("GameStoppedEvent");
+			gameStoppedEvent.setUserName(loggedOutOpenByLeftFirstEvent.getOpenBy());
+			gameStoppedEvent.setGameRoom(loggedOutOpenByLeftFirstEvent.getGameRoom());
+			BackgammonBoardJson backgammonBoardJson = context.getBean(BackgammonBoardJson.class);
+			backgammonBoardJson.initBoard(backgammonGameService.getBoard(gameRoomName));
+			gameStoppedEvent.setBackgammonBoardJson(backgammonBoardJson);
+			gameStoppedEvent.setFirstDice(backgammonGameService.getFirstDice(gameRoomName));
+			gameStoppedEvent.setSecondDice(backgammonGameService.getSecondDice(gameRoomName));
 			
-//			backgammonGameService.initGameAndStart(initGameRoomCompletedEvent.getGameRoom());
+			consumerToProducerQueue.getEventsQueue().put(gameStoppedEvent);
 		}
 		catch(Exception e){
 			logger.error("Failed to add new game room to view...");
