@@ -203,6 +203,16 @@ public class BackgammonGameService {
 		backgammon.getTurnManager().passTurn();
 	}
 	
+	public void setHasWinner(String gameRoomName){
+		Backgammon backgammon = backgammonGames.get(gameRoomName);
+		backgammon.setIsHasWinner(true);
+	}
+	
+	public boolean isGamePlayable(String gameRoomName){
+		Backgammon backgammon = backgammonGames.get(gameRoomName);
+		return !backgammon.getIsHasWinner();
+	}
+	
 	private Move initMove(int from, int to) {
 		Move move = context.getBean(Move.class);
 		BackgammonBoardLocation fromLocation = context.getBean(BackgammonBoardLocation.class);

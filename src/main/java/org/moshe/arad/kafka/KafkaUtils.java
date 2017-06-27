@@ -77,5 +77,6 @@ public class KafkaUtils {
 	public static final String LAST_MOVE_BLACK_PAWN_CAME_BACK_AND_ATE_WHITE_PAWN_EVENT_TOPIC = "Last-Move-Black-Pawn-Came-Back-And-Ate-White-Pawn-Event";
 	public static final String TURN_NOT_PASSED_BLACK_PAWN_CAME_BACK_AND_ATE_WHITE_PAWN_EVENT_TOPIC = "Turn-Not-Passed-Black-Pawn-Came-Back-And-Ate-White-Pawn-Event";
 	public static final String DICE_ROLLED_CAN_NOT_PLAY_EVENT_TOPIC = "Dice-Rolled-Can-Not-Play-Event";
+	public static final String WINNER_MOVE_MADE_EVENT_TOPIC = "Winner-Move-Made-Event";
 	
 }

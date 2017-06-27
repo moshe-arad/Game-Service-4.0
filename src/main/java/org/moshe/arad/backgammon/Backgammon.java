@@ -22,9 +22,10 @@ public class Backgammon {
 	private ClassicGameTurnOrderManager<BackgammonPlayer> turnManager;
 	private BackgammonPlayer firstPlayer;
 	private BackgammonPlayer secondPlayer;
+	private Boolean isHasWinner;
 	
 	public Backgammon() {
-	
+		isHasWinner = false;
 	}
 	
 	public Backgammon(BackgammonPlayer first, 
@@ -32,6 +33,8 @@ public class Backgammon {
 			@Autowired BackgammonTurn turn,
 			@Autowired ClassicGameTurnOrderManager<BackgammonPlayer> turnManager,
 			@Autowired BackgammonBoard board){
+		
+		isHasWinner = false;
 		
 		//turn contains/holds dice
 		firstPlayer.setTurn(turn);
@@ -76,5 +79,13 @@ public class Backgammon {
 
 	public void setSecondPlayer(BackgammonPlayer secondPlayer) {
 		this.secondPlayer = secondPlayer;
+	}
+
+	public Boolean getIsHasWinner() {
+		return isHasWinner;
+	}
+
+	public void setIsHasWinner(Boolean isHasWinner) {
+		this.isHasWinner = isHasWinner;
 	}
 }

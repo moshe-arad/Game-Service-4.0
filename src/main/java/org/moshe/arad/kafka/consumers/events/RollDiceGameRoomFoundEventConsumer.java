@@ -48,44 +48,45 @@ public class RollDiceGameRoomFoundEventConsumer extends SimpleEventsConsumer {
 		String whiteUserName = rollDiceGameRoomFoundEvent.getGameRoom().getOpenBy();
 		String blackUserName = rollDiceGameRoomFoundEvent.getGameRoom().getSecondPlayer();
 		
-		if((backgammonGameService.isWhiteTurn(gameRoomName) && whiteUserName.equals(rollDiceGameRoomFoundEvent.getUsername())) || 
-				(backgammonGameService.isBlackTurn(gameRoomName) && blackUserName.equals(rollDiceGameRoomFoundEvent.getUsername()))){
-			
-			backgammonGameService.rollDice(gameRoomName);
-			try {
-				if(backgammonGameService.isCanKeepPlay(gameRoomName, rollDiceGameRoomFoundEvent.getUsername())){
-					DiceRolledEvent diceRolledEvent = context.getBean(DiceRolledEvent.class);
-					diceRolledEvent.setUuid(rollDiceGameRoomFoundEvent.getUuid());
-					diceRolledEvent.setArrived(new Date());
-					diceRolledEvent.setClazz("DiceRolledEvent");
-					diceRolledEvent.setUsername(rollDiceGameRoomFoundEvent.getUsername());
-					diceRolledEvent.setGameRoom(rollDiceGameRoomFoundEvent.getGameRoom());
-					diceRolledEvent.setFirstDice(backgammonGameService.getFirstDice(gameRoomName));
-					diceRolledEvent.setSecondDice(backgammonGameService.getSecondDice(gameRoomName));
-					
-					consumerToProducer.get(DiceRolledEvent.class).getEventsQueue().put(diceRolledEvent);
+		if(backgammonGameService.isGamePlayable(gameRoomName)){
+			if((backgammonGameService.isWhiteTurn(gameRoomName) && whiteUserName.equals(rollDiceGameRoomFoundEvent.getUsername())) || 
+					(backgammonGameService.isBlackTurn(gameRoomName) && blackUserName.equals(rollDiceGameRoomFoundEvent.getUsername()))){
+				
+				backgammonGameService.rollDice(gameRoomName);
+				try {
+					if(backgammonGameService.isCanKeepPlay(gameRoomName, rollDiceGameRoomFoundEvent.getUsername())){
+						DiceRolledEvent diceRolledEvent = context.getBean(DiceRolledEvent.class);
+						diceRolledEvent.setUuid(rollDiceGameRoomFoundEvent.getUuid());
+						diceRolledEvent.setArrived(new Date());
+						diceRolledEvent.setClazz("DiceRolledEvent");
+						diceRolledEvent.setUsername(rollDiceGameRoomFoundEvent.getUsername());
+						diceRolledEvent.setGameRoom(rollDiceGameRoomFoundEvent.getGameRoom());
+						diceRolledEvent.setFirstDice(backgammonGameService.getFirstDice(gameRoomName));
+						diceRolledEvent.setSecondDice(backgammonGameService.getSecondDice(gameRoomName));
+						
+						consumerToProducer.get(DiceRolledEvent.class).getEventsQueue().put(diceRolledEvent);
+					}
+					else{
+						backgammonGameService.passTurn(gameRoomName);
+						
+						DiceRolledCanNotPlayEvent diceRolledCanNotPlayEvent = context.getBean(DiceRolledCanNotPlayEvent.class);
+						diceRolledCanNotPlayEvent.setUuid(rollDiceGameRoomFoundEvent.getUuid());
+						diceRolledCanNotPlayEvent.setArrived(new Date());
+						diceRolledCanNotPlayEvent.setClazz("DiceRolledCanNotPlayEvent");
+						diceRolledCanNotPlayEvent.setUsername(rollDiceGameRoomFoundEvent.getUsername());
+						diceRolledCanNotPlayEvent.setGameRoom(rollDiceGameRoomFoundEvent.getGameRoom());
+						diceRolledCanNotPlayEvent.setFirstDice(backgammonGameService.getFirstDice(gameRoomName));
+						diceRolledCanNotPlayEvent.setSecondDice(backgammonGameService.getSecondDice(gameRoomName));
+						
+						consumerToProducer.get(DiceRolledCanNotPlayEvent.class).getEventsQueue().put(diceRolledCanNotPlayEvent);
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
 				}
-				else{
-					backgammonGameService.passTurn(gameRoomName);
-					
-					DiceRolledCanNotPlayEvent diceRolledCanNotPlayEvent = context.getBean(DiceRolledCanNotPlayEvent.class);
-					diceRolledCanNotPlayEvent.setUuid(rollDiceGameRoomFoundEvent.getUuid());
-					diceRolledCanNotPlayEvent.setArrived(new Date());
-					diceRolledCanNotPlayEvent.setClazz("DiceRolledCanNotPlayEvent");
-					diceRolledCanNotPlayEvent.setUsername(rollDiceGameRoomFoundEvent.getUsername());
-					diceRolledCanNotPlayEvent.setGameRoom(rollDiceGameRoomFoundEvent.getGameRoom());
-					diceRolledCanNotPlayEvent.setFirstDice(backgammonGameService.getFirstDice(gameRoomName));
-					diceRolledCanNotPlayEvent.setSecondDice(backgammonGameService.getSecondDice(gameRoomName));
-					
-					consumerToProducer.get(DiceRolledCanNotPlayEvent.class).getEventsQueue().put(diceRolledCanNotPlayEvent);
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
+				
 			}
-			
+			else throw new RuntimeException("User don't own play turn, thus can not roll dice...");
 		}
-		else throw new RuntimeException("User don't own play turn, thus can not roll dice...");
-		
 	}
 	
 	private RollDiceGameRoomFoundEvent convertJsonBlobIntoEvent(String JsonBlob){
