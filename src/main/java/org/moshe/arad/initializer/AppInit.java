@@ -15,13 +15,17 @@ import org.moshe.arad.kafka.consumers.config.InitGameRoomCompletedEventConfig;
 import org.moshe.arad.kafka.consumers.config.LoggedOutOpenByLeftFirstEventConfig;
 import org.moshe.arad.kafka.consumers.config.LoggedOutSecondLeftFirstEventConfig;
 import org.moshe.arad.kafka.consumers.config.MakeMoveCommandConfig;
+import org.moshe.arad.kafka.consumers.config.OpenByLeftFirstEventConfig;
 import org.moshe.arad.kafka.consumers.config.RollDiceCommandConfig;
 import org.moshe.arad.kafka.consumers.config.RollDiceGameRoomFoundEventConfig;
+import org.moshe.arad.kafka.consumers.config.SecondLeftFirstEventConfig;
 import org.moshe.arad.kafka.consumers.config.SimpleConsumerConfig;
 import org.moshe.arad.kafka.consumers.events.InitGameRoomCompletedEventConsumer;
 import org.moshe.arad.kafka.consumers.events.LoggedOutOpenByLeftFirstEventConsumer;
 import org.moshe.arad.kafka.consumers.events.LoggedOutSecondLeftFirstEventConsumer;
+import org.moshe.arad.kafka.consumers.events.OpenByLeftFirstEventConsumer;
 import org.moshe.arad.kafka.consumers.events.RollDiceGameRoomFoundEventConsumer;
+import org.moshe.arad.kafka.consumers.events.SecondLeftFirstEventConsumer;
 import org.moshe.arad.kafka.events.BackgammonEvent;
 import org.moshe.arad.kafka.events.BlackAteWhitePawnEvent;
 import org.moshe.arad.kafka.events.BlackPawnCameBackAndAteWhitePawnEvent;
@@ -205,6 +209,22 @@ public class AppInit implements ApplicationContextAware, IAppInitializer {
 	@Autowired
 	private SimpleEventsProducer<GameStoppedEvent> loggedOutSecondLeftFirstGameStoppedEventProducer;
 	
+	private OpenByLeftFirstEventConsumer openByLeftFirstEventConsumer;
+	
+	@Autowired
+	private OpenByLeftFirstEventConfig openByLeftFirstEventConfig;
+	
+	@Autowired
+	private SimpleEventsProducer<GameStoppedEvent> openByLeftFirstGameStoppedEventProducer;
+	
+	private SecondLeftFirstEventConsumer secondLeftFirstEventConsumer;
+	
+	@Autowired
+	private SecondLeftFirstEventConfig secondLeftFirstEventConfig;
+	
+	@Autowired
+	private SimpleEventsProducer<GameStoppedEvent> secondLeftFirstGameStoppedEventProducer;
+	
 	private ConsumerToProducerQueue initGameRoomCompletedEventQueue;
 	
 	private ConsumerToProducerQueue rollDiceCommandQueue;
@@ -271,9 +291,13 @@ public class AppInit implements ApplicationContextAware, IAppInitializer {
 	
 	private ConsumerToProducerQueue winnerMoveMadeEventQueue;
 	
-	private ConsumerToProducerQueue loggedOutOpenByLeftFirstEventQueue;
+	private ConsumerToProducerQueue loggedOutOpenByLeftFirstGameStoppedEventQueue;
 	
-	private ConsumerToProducerQueue loggedOutSecondLeftFirstEventQueue;
+	private ConsumerToProducerQueue loggedOutSecondLeftFirstGameStoppedEventQueue;
+	
+	private ConsumerToProducerQueue openByLeftFirstGameStoppedEventQueue;
+	
+	private ConsumerToProducerQueue secondLeftFirstGameStoppedEventQueue;
 	
 	private ExecutorService executor = Executors.newFixedThreadPool(6);
 	
@@ -368,8 +392,10 @@ public class AppInit implements ApplicationContextAware, IAppInitializer {
 		initGameRoomCompletedEventQueue = context.getBean(ConsumerToProducerQueue.class);
 		diceRolledEventQueue = context.getBean(ConsumerToProducerQueue.class);
 		diceRolledCanNotPlayQueue = context.getBean(ConsumerToProducerQueue.class);
-		loggedOutOpenByLeftFirstEventQueue = context.getBean(ConsumerToProducerQueue.class);
-		loggedOutSecondLeftFirstEventQueue = context.getBean(ConsumerToProducerQueue.class);
+		loggedOutOpenByLeftFirstGameStoppedEventQueue = context.getBean(ConsumerToProducerQueue.class);
+		loggedOutSecondLeftFirstGameStoppedEventQueue = context.getBean(ConsumerToProducerQueue.class);
+		openByLeftFirstGameStoppedEventQueue = context.getBean(ConsumerToProducerQueue.class);
+		secondLeftFirstGameStoppedEventQueue = context.getBean(ConsumerToProducerQueue.class);
 		
 		for(int i=0; i<NUM_CONSUMERS; i++){
 			initGameRoomCompletedEventConsumer = context.getBean(InitGameRoomCompletedEventConsumer.class);
@@ -385,15 +411,23 @@ public class AppInit implements ApplicationContextAware, IAppInitializer {
 			initSingleConsumer(rollDiceGameRoomFoundEventConsumer, KafkaUtils.ROLL_DICE_GAME_ROOM_FOUND_EVENT_TOPIC, rollDiceGameRoomFoundEventConfig, null);
 			
 			loggedOutOpenByLeftFirstEventConsumer = context.getBean(LoggedOutOpenByLeftFirstEventConsumer.class);
-			initSingleConsumer(loggedOutOpenByLeftFirstEventConsumer, KafkaUtils.LOGGED_OUT_OPENBY_LEFT_FIRST_EVENT_TOPIC, loggedOutOpenByLeftFirstEventConfig, loggedOutOpenByLeftFirstEventQueue);
+			initSingleConsumer(loggedOutOpenByLeftFirstEventConsumer, KafkaUtils.LOGGED_OUT_OPENBY_LEFT_FIRST_EVENT_TOPIC, loggedOutOpenByLeftFirstEventConfig, loggedOutOpenByLeftFirstGameStoppedEventQueue);
 			
 			loggedOutSecondLeftFirstEventConsumer = context.getBean(LoggedOutSecondLeftFirstEventConsumer.class);
-			initSingleConsumer(loggedOutSecondLeftFirstEventConsumer, KafkaUtils.LOGGED_OUT_SECOND_LEFT_FIRST_EVENT_TOPIC, loggedOutSecondLeftFirstEventConfig, loggedOutSecondLeftFirstEventQueue);
+			initSingleConsumer(loggedOutSecondLeftFirstEventConsumer, KafkaUtils.LOGGED_OUT_SECOND_LEFT_FIRST_EVENT_TOPIC, loggedOutSecondLeftFirstEventConfig, loggedOutSecondLeftFirstGameStoppedEventQueue);
+			
+			openByLeftFirstEventConsumer = context.getBean(OpenByLeftFirstEventConsumer.class);
+			initSingleConsumer(openByLeftFirstEventConsumer, KafkaUtils.OPENBY_LEFT_FIRST_EVENT_TOPIC, openByLeftFirstEventConfig, openByLeftFirstGameStoppedEventQueue);
+			
+			secondLeftFirstEventConsumer = context.getBean(SecondLeftFirstEventConsumer.class);
+			initSingleConsumer(secondLeftFirstEventConsumer, KafkaUtils.SECOND_LEFT_FIRST_EVENT_TOPIC, secondLeftFirstEventConfig, secondLeftFirstGameStoppedEventQueue);
 			
 			executeProducersAndConsumers(Arrays.asList(initGameRoomCompletedEventConsumer,
 					rollDiceGameRoomFoundEventConsumer,
 					loggedOutOpenByLeftFirstEventConsumer,
-					loggedOutSecondLeftFirstEventConsumer));
+					loggedOutSecondLeftFirstEventConsumer,
+					openByLeftFirstEventConsumer,
+					secondLeftFirstEventConsumer));
 		}
 	}
 
@@ -471,9 +505,13 @@ public class AppInit implements ApplicationContextAware, IAppInitializer {
 		
 		initSingleProducer(winnerMoveMadeEventProducer, KafkaUtils.WINNER_MOVE_MADE_EVENT_TOPIC, winnerMoveMadeEventQueue);
 		
-		initSingleProducer(loggedOutOpenByLeftFirstGameStoppedEventProducer, KafkaUtils.LOGGED_OUT_OPENBY_LEFT_FIRST_GAME_STOPPED_EVENT_TOPIC, loggedOutOpenByLeftFirstEventQueue);
+		initSingleProducer(loggedOutOpenByLeftFirstGameStoppedEventProducer, KafkaUtils.LOGGED_OUT_OPENBY_LEFT_FIRST_GAME_STOPPED_EVENT_TOPIC, loggedOutOpenByLeftFirstGameStoppedEventQueue);
 		
-		initSingleProducer(loggedOutSecondLeftFirstGameStoppedEventProducer, KafkaUtils.LOGGED_OUT_SECOND_LEFT_FIRST_GAME_STOPPED_EVENT_TOPIC, loggedOutSecondLeftFirstEventQueue);
+		initSingleProducer(loggedOutSecondLeftFirstGameStoppedEventProducer, KafkaUtils.LOGGED_OUT_SECOND_LEFT_FIRST_GAME_STOPPED_EVENT_TOPIC, loggedOutSecondLeftFirstGameStoppedEventQueue);
+		
+		initSingleProducer(openByLeftFirstGameStoppedEventProducer, KafkaUtils.OPENBY_LEFT_FIRST_GAME_STOPPED_EVENT_TOPIC, openByLeftFirstGameStoppedEventQueue);
+		
+		initSingleProducer(secondLeftFirstGameStoppedEventProducer, KafkaUtils.SECOND_LEFT_FIRST_GAME_STOPPED_EVENT_TOPIC, secondLeftFirstGameStoppedEventQueue);
 		
 		executeProducersAndConsumers(Arrays.asList(gameStartedEventEventProducer,
 				initDiceCompletedEventProducer,
@@ -509,7 +547,9 @@ public class AppInit implements ApplicationContextAware, IAppInitializer {
 				diceRolledCanNotPlayEventProducer,
 				winnerMoveMadeEventProducer,
 				loggedOutOpenByLeftFirstGameStoppedEventProducer,
-				loggedOutSecondLeftFirstGameStoppedEventProducer));
+				loggedOutSecondLeftFirstGameStoppedEventProducer,
+				openByLeftFirstGameStoppedEventProducer,
+				secondLeftFirstGameStoppedEventProducer));
 	}
 
 	@Override
